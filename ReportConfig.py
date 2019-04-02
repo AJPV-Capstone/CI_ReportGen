@@ -1,5 +1,7 @@
 import json
 import base64
+import os
+
 
 class ReportConfig(object):
     """Report options/configurations
@@ -39,27 +41,34 @@ class ReportConfig(object):
         Other Header Attributes:
             MUN_logo: The MUN logo in base64
             font_sizes: A dictionary of font sizes used in the Report
+
+        Todo:
+            - Verify the accuracy of this docstring
     """
 
 
-    def __init__(self, config_file = None):
+    def __init__(self, config_file = None, config_path=None):
         """Object initializes from configuration file or keyword arguments
 
         Object also opens the MUN logo
 
         Args:
-            config_file(string): If used, overwrites attributes that were set
-                during the default configuration
+            config_file(string): A configuration to use. Defaults to using just
+                the default configuration
+            config_path: The path to the config folders. Defaults to finding it
+                with os.path
         """
-        import os
+        if not config_path:
+            config_path = os.path.dirname(__file__) + '/config/'
+
         # Load default config file and set attributes based on its contents
-        default = json.load(open(os.path.dirname(__file__) + '/config/default.json'))
+        default = json.load(open(config_path + 'default.json'))
         for key in default:
             setattr(self, key, default[key])
 
         # Overwrite default options with the passed in config file if necessary
         if config_file:
-            new_attribs = json.load(open(config_file))
+            new_attribs = json.load(open(config_path + config_file))
             for key in new_attribs:
                 setattr(self, key, new_attribs[key])
 
