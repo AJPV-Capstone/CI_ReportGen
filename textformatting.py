@@ -88,16 +88,15 @@ def format_bin_ranges(bins, bin_labels):
     return bin_description
 
 
-def get_cohort(x, course=None, term_taken=None):
-    """Convert a year and term to equivalent cohort using course number
+def get_cohort(year, course=None, term_taken=None):
+    """Convert a year to equivalent cohort
 
     Args:
-        x: a number containing year and optionally, semester
+        year: a number containing year and optionally, semester (which will be ignored)
             Examples: 2017, 201703, 2019
         course: The course name or number
         term_taken: An override variable for courses that have unconventional
-            numbering, such as CHEM1051 being taken in term 3. Overrides any
-            derivations
+            numbering, such as CHEM1051 being taken in term 3.
 
     Returns:
         The equivalent cohort
@@ -106,43 +105,33 @@ def get_cohort(x, course=None, term_taken=None):
         NotImplementedError: If the term_taken or the first number in the course
             name is 0, that means that the course is a work term course. This
             function does not have the necessary information to determine cohort
-            using just the year, semester and course number.
+            using just the year, term taken and course number.
     """
     # Find the first number that occurs in the course UNLESS the term_taken
     # variable is used
     if not term_taken:
         term_taken = int(re.search("\d", course).group(0))
 
-    # Convert x to a string so that it's easier to deal with
-    x = str(x)
-    # If term is included, split the year and semester
-    if len(x) > 4:
-        year = int(x[:4])
-        semester = int(x[5:])
-    else:
-        year = int(x)
-        semester = 0
+    # If term is included, split the year off of it via repeated int division
+    # If year is greater than 9999, then it's not a year
+    while year > 9999:
+        year //= 10
 
     # Co-op work term check - raise error if the course found is a co-op course
     if term_taken == 0:
         raise NotImplementedError()
 
-    # Start with cohort equalling the year. If the course was taken in the winter
-    # or summer, add 1
     cohort = year
-    if semester > 1:
-        cohort += 1
-
-    # Use conditionals from that point
-    if term_taken in (1,2): # 20(y)01 or 20(y)02
+    # Use conditionals to map the term to the cohort
+    if term_taken in (1,2): # Engineering One usually - add 5
         cohort += 5
-    elif term_taken in (3,4):# 20(y+1)01 or 20(y+1)03
+    elif term_taken in (3,4):# Year 2 of the program - add 4
         cohort += 4
-    elif term_taken == 5: # 20(y+2)02
+    elif term_taken == 5: # Year 3 of the program - add 3
         cohort += 3
-    elif term_taken in (6,7):   # 20(y+3)01 or 20(y+4)03
+    elif term_taken in (6,7):   # Year 4 of the program - add 2
         cohort += 2
-    elif term_taken == 8: # 20(y+4)02
+    elif term_taken == 8: # Year 5 of the program - add 1
         cohort += 1
 
     return cohort
