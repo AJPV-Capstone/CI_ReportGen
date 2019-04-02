@@ -15,12 +15,6 @@ class ReportGenerator(object):
 
     Attributes:
         config: A ReportConfig object
-        blacklist: A dictionary including lists of the things that should be
-            skipped. Options can include, but are not limited to, lists of:
-            - programs
-            - courses
-            - indicators
-            - assessments
         whitelist: A dictionary including lists of the only things that should
             be processed. Options can include, but are not limited to, lists of:
             - programs
@@ -39,7 +33,7 @@ class ReportGenerator(object):
     """
 
 
-    def __init__(self, config, year=None, semester=None, blacklist=None, whitelist=None, ds=None,
+    def __init__(self, config, year=None, semester=None, whitelist=None, ds=None,
             indicators_loc=None, grades_loc=None, histogram_store=None):
         """Object Initialization
 
@@ -50,9 +44,6 @@ class ReportGenerator(object):
                 to None
             semester: An integer from 1 to 3 indicating the semester. Defaults
                 to None
-            #blacklist: A dictionary of lists, keyed by what not to parse (i.e.
-            #    'program', 'course', etc.) and filled with the specific values
-            #    to not parse. Defaults to no blacklist
             whitelist: A dictionary of lists, keyed by the only stuff to parse (i.e.
                 'program', 'course', etc.) and filled with the specific values
                 to uniquely parse. Defaults to no whitelist
