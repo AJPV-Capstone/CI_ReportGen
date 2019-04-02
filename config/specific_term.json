@@ -1,0 +1,17 @@
+{
+    "name": "specific_term",
+    "annotation_font": 16,
+    "dpi": 150,
+    "orientation": "landscape",
+    "format": "pdf",
+    "max_plots": 1,
+    "add_percents": true,
+    "add_legend": true,
+    "show_NDA": true,
+    "NDA_threshold": 0.1,
+    "header_attribs": "Graduate Attribute, Indicator, Level, Program, Course, Assessment",
+    "header_xloc": 0.33,
+    "header_yloc": 1.9,
+    "add_title": true,
+    "graph_title": "GRADE DISTRIBUTION FOR CLASS OF {}"
+}

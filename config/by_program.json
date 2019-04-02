@@ -1,0 +1,19 @@
+{
+    "name": "by_program",
+    "plot_grades_by": "program",
+    "use_indicators_from": "ENCV",
+    "annotation_font": 16,
+    "dpi": 150,
+    "orientation": "landscape",
+    "format": "pdf",
+    "max_plots": 7,
+    "add_percents": true,
+    "add_legend": true,
+    "show_NDA": true,
+    "NDA_threshold": 0.0,
+    "header_attribs": "Graduate Attribute, Indicator, Level, Program, Course, Assessment",
+    "header_xloc": 0.33,
+    "header_yloc": 1.9,
+    "add_title": true,
+    "graph_title": "GRADE DISTRIBUTION FOR CLASS OF {}"
+}
