@@ -27,6 +27,7 @@ class ReportGenerator(object):
 
         Todo:
             - Implement a blacklisting feature
+            - Update the attributes in this docstring
     """
 
 
@@ -123,11 +124,18 @@ class ReportGenerator(object):
             dict: A dictionary containing the indicator information, keyed using instructions
             list(float): The bin ranges that have been converted from a comma-separated string
                 to a list of floats. 0 gets appended to the front for NumPy histogram
+
+        Todo:
+            - Document the exceptions
         """
         logging.info("Parsing a row from a Pandas DataFrame")
         logging.debug("Row: %s", str(row))
         # Handle the bins first since those are easy
-        bins = [float(x) for x in row['Bins'].split(',')]
+        try:
+            bins = [float(x) for x in row['Bins'].split(',')]
+        except Exception as exc:
+            logging.warning("ERROR: Non-number bins encountered in a lookup table")
+            return None, None
         logging.debug("Bins parsed as:\t%s", ', '.join(str(x) for x in bins))
 
         # Convert the comma-separated string into dictionary keys
@@ -205,6 +213,12 @@ class ReportGenerator(object):
 
                 # Obtain the necessary indicator data and bins
                 indicator_data, bins = self._parse_row(row)
+                if not bins:
+                    logging.warning("ERROR: No useable bins for {} {} {} {}, skipping row".format(
+                            row['Indicator #'], row['Level'], row['Course #'], row['Method of Assessment']
+                    ))
+                    continue
+
                 indicator_data['Program'] = program
                 logging.debug("Indicator data obtained from the row: %s", str(indicator_data))
 
@@ -247,7 +261,7 @@ class ReportGenerator(object):
                 # previous histograms left there will get overridden with each
                 # run of the generator.
                 #------------------------------------------------------------------------
-                
+
                 logging.info("Creating a histogram save directory for %s", program)
                 os.makedirs(self.config.histograms_loc + program, exist_ok=True)
                 report.save(self.config.histograms_loc + "{program}/{GA}-{L} {course} {assess} Report - {cfg}.pdf".format(
