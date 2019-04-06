@@ -1,6 +1,7 @@
 import json
 import base64
 import os
+import logging
 
 
 class ReportConfig(object):
@@ -44,6 +45,7 @@ class ReportConfig(object):
 
         Todo:
             - Verify the accuracy of this docstring
+            - Implement a config saving feature using this object
     """
 
 
@@ -58,10 +60,13 @@ class ReportConfig(object):
             config_path: The path to the config folders. Defaults to finding it
                 with os.path
         """
+        logging.info("Start of ReportConfig initialization")
         if not config_path:
             config_path = os.path.dirname(__file__) + '/config/'
+            logging.debug("Config path not specified, using %s", config_path)
 
         # Load default config file and set attributes based on its contents
+        logging.info("Setting attributes from default.json")
         default = json.load(open(config_path + 'default.json'))
         for key in default:
             setattr(self, key, default[key])
@@ -69,10 +74,12 @@ class ReportConfig(object):
         # Overwrite default options with the passed in config file if necessary
         if config_file:
             new_attribs = json.load(open(config_path + config_file))
+            logging.info("Overriding attributes using config file %s", config_file)
             for key in new_attribs:
                 setattr(self, key, new_attribs[key])
 
         # Set up font sizes and paper dimensions
+        logging.info("Setting up font sizes")
         self.font_sizes = {
             'graph_title': self.annotation_font*1.5,
             'yaxis_title': self.annotation_font,
@@ -82,12 +89,21 @@ class ReportConfig(object):
             'barcounts': int(self.annotation_font/1.2),
             'legend_text': self.annotation_font
         }
+        logging.info("Setting up paper dimensions")
         self.paper_dimensions = {
             'landscape': (11.69, 8.27),
             'portrait': (8.27, 11.69)
         }
-
         # Open the MUN logo and save it in base64
+        logging.info("Saving MUN logo in base64")
+        logging.debug("Opening MUN logo from %s", os.path.dirname(__file__) + '/MUN_Logo_RGB2.png')
         with open(os.path.dirname(__file__) + '/MUN_Logo_RGB2.png', 'rb') as image_file:
             encoded_logo = base64.b64encode(image_file.read()).decode()
         self.MUN_logo = 'data:image/png;base64,' + encoded_logo
+
+        logging.info("Setting default directories to find indicators, grades and histograms")
+        self.indicators_loc = os.path.dirname(__file__) + '/../Indicators/'
+        self.grades_loc = os.path.dirname(__file__) + '/../Grades/'
+        self.histograms_loc = os.path.dirname(__file__) + '/../Histograms/'
+
+        logging.info("ReportConfig initialization complete!")

@@ -1,6 +1,7 @@
 """Functions for formatting text in different ways"""
 import textwrap
 import re
+import logging
 
 def format_annotation_text(header_info):
     """Create a table-like format for the header text on a Report
@@ -18,6 +19,7 @@ def format_annotation_text(header_info):
         string: The Graduate Attribute is returned in a separate string so that
             its font size can be increased on a Report
     """
+    logging.info("Cleaning up the header information and making it a table format")
     title = header_info["Graduate Attribute"]
     # After saving the element, set the GA attribute to empty for newline entry
     header_info["Graduate Attribute"] = " "
@@ -26,6 +28,7 @@ def format_annotation_text(header_info):
     description_list = list()
 
     for key in header_info.keys():
+        logging.debug("Cleaning up %s", key)
         # Use textwrap to paragraphize the passed in text, with each line stored in a list
         label_list += textwrap.wrap(key + ':', width=12)
         description_list += textwrap.wrap(header_info[key], width=60)
@@ -70,10 +73,14 @@ def format_bin_ranges(bins, bin_labels):
     Returns:
         string: A string describing the bin ranges
     """
+    logging.info("Cleaning up the bin ranges and making them a message")
     size=len(bin_labels)
+    logging.debug("Bin labels length is %s", size)
+
     bin_description = "Bin ranges: marks out of {:.0f}<br>".format(bins[size])
     # If the first bin is <=0, use a '<' sign to indicate the first bin
     if bins[0] <= 0:
+        logging.debug("First bin was %s, adding a < sign", str(bins[0]))
         bin_description += "<{:.0f}: {}   ".format(bins[0],bin_labels[0])
     else:
         bin_description += "{:.0f}-{:.0f}: {}   ".format(bins[0],bins[1]-1,bin_labels[0])

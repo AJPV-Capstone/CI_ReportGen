@@ -6,6 +6,7 @@ from ReportConfig import ReportConfig
 import os
 from collections import defaultdict
 import numpy as np
+import logging
 
 class Report(object):
     """Report Class
@@ -46,10 +47,15 @@ class Report(object):
         Todo:
             - Write this docstring
         """
+        logging.info("Initializing Report object")
+        logging.debug("Report being initialized with bins: %s", bins)
+        logging.debug("Report being initialized with indicator data: %s", indicator_data)
         # If no config was passed as an argument, create a new one
         if not config:
+            logging.info("No config was passed to the object, creating one now")
             self.config = ReportConfig()
         else:
+            logging.info("Config was passed to the object")
             self.config = config
 
         # Set the indicator data and bin things
@@ -57,8 +63,10 @@ class Report(object):
         # Append 0 to the bins front if the size is 4
         if len(bins) == 4:
             self.bins = [0] + bins
+            logging.debug("Indicator bins were turned into: %s", ', '.join(str(x) for x in self.bins))
         else:
             self.bins = bins
+
         self.bin_labels = [
             'Below Expectations',
             'Marginally Meets Expectations',
@@ -66,10 +74,16 @@ class Report(object):
             'Exceeds Expectations'
         ]
 
+        logging.debug("Indicator bins: %s", ', '.join(str(x) for x in self.bins))
+        logging.debug("Indicator data: %s", str(self.indicator_data))
+
         # Set up the plotly objects
+        logging.info("Setting up plotly things, including a list of traces, a list of annotations, and a layout")
         self.traces=list()
         self.layout=pog.generate_layout(self.config)
         self._annotations = list()
+
+        logging.info("Report object initialization complete!")
 
 
     def plot(self, grades):
@@ -81,8 +95,10 @@ class Report(object):
                 entries
 
         Todo:
-            - Clean up the NDA filtering thing
+            - Clean up the NDA filtering thing (idea: do the threshold check in
+              the np.histogram for loop)
         """
+        logging.info("Setting up required resources for plotting")
         # Store the data in dicts of NumPy arrays before converting to barcharts
         data = defaultdict()
         # Copy the bin ranges
@@ -92,37 +108,55 @@ class Report(object):
 
         # if show_NDA is True, add -1 to the front of the bins
         if self.config.show_NDA == True:
+            logging.info("Show NDA is set to True, adding -1 to front of bins")
             bins_copy = [-1.0] + bins_copy
+        logging.debug("Bins being passed to NumPy histogram: %s", ', '.join(str(x) for x in bins_copy))
 
         # Histogram data by column
+        logging.info("Running NumPy histogram")
         for col in grades.columns:
             # Add histogrammed grades to the data dict, converted to percentage
             data[col] = np.histogram(grades[col], bins=bins_copy)[0] / len(grades[col]) * 100
+            logging.debug("Data added to data[%s]:", col)
+            logging.debug(', '.join(str(x) for x in data[col]))
 
         # Check the NDA percentages and determine if NDA should be shown
+        logging.info("Checking to see if NDA should be removed")
         if self.config.show_NDA == True:
+            logging.info("Show NDA is True, so check is going ahead. NDA threshold: %s", str(self.config.NDA_threshold))
             delete_NDA = True
             # First pass determines if any of the bins are above the threshold
+            logging.info("Performing first pass over data to check if any bins are above threshold")
             for key in data.keys():
                 # If any NDA bins are above the threshold, don't delete them
                 if data[key][0] >= self.config.NDA_threshold*100:
                     delete_NDA = False
+                    logging.debug("The NDA value from key %s exceeded the threshold, so NDA will not be stripped", key)
+                    logging.debug("That value was %s", str(data[key][0]))
                     # Add NDA bin label to front
                     bin_labels_copy = ["No Data Available"] + bin_labels_copy
+                    break
 
             if delete_NDA == True:
+                logging.info("No value exceeded the threshold, so NDA bins will be stripped")
                 # Second pass will remove the NDA bins if they have to be removed
                 for key in data.keys():
                     data[key] = np.delete(data[key], 0)
 
         # Bar the data
+        logging.info("Barring the data now")
+        logging.debug("Bin labels being passed to plotly bar: %s", ', '.join(bin_labels_copy))
         for key in data.keys():
             # Add percentage text labels only if add_percents is True
+            logging.debug("Barring data for set %s", key)
             if not self.config.add_percents:
+                logging.debug("self.config.add_percents is %s, bar text set to None", str(self.config.add_percents))
                 text = None
             else:
+                logging.debug("self.config.add_percents is %s, setting bar text to percentages", str(self.config.add_percents))
                 text = tf.format_percents(data[key])
 
+            logging.debug("Adding the plotly bar trace now")
             self.traces.append(go.Bar(
                 name = key,
                 x = bin_labels_copy, y = data[key],
@@ -131,6 +165,8 @@ class Report(object):
                 constraintext = 'inside',
                 textfont=dict(size=int(self.config.font_sizes['barcounts']/100*self.config.dpi))
             ))
+
+        logging.info("Barring complete!")
 
 
     def _append_annotations(self):
@@ -141,12 +177,14 @@ class Report(object):
         pretty redundant now, but it's staying here anyways for the time being
 
         """
+        logging.debug("Updating the annotations in the layout using self._annotations")
         self.layout.update(annotations=self._annotations)
 
 
     def add_header(self):
         """Add the header information to the annotations list"""
         # Get the text to add to the graph
+        logging.info("Adding header to Report")
         labels, descriptions, title = tf.format_annotation_text(self.indicator_data)
         self._annotations += [
             # GA
@@ -184,6 +222,7 @@ class Report(object):
 
     def add_bin_ranges(self):
         """Add bin ranges to bottom of plot"""
+        logging.info("Adding bin ranges to Report")
         self._annotations.append(go.layout.Annotation(
             x=0.5, y=-self.config.font_sizes['legend_text']/100*1.5,
             showarrow=False,
@@ -204,6 +243,7 @@ class Report(object):
                 string in the ReportConfig is a formatted string. Defaults
                 to empty
         """
+        logging.info("Adding title to graph on the Report")
         self._annotations.append(go.layout.Annotation(
             x=0.5, y=1+self.config.font_sizes['graph_title']/125,
             showarrow=False,
@@ -224,6 +264,7 @@ class Report(object):
         if not format:
             format = self.config.format
 
+        logging.info("Saving Report in %s format", format)
         # Add the annotations to the figure Layout
         self._append_annotations()
         fig = go.Figure(data = self.traces, layout = self.layout)

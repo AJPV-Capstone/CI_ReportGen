@@ -6,9 +6,15 @@ import globals
 from ReportConfig import ReportConfig
 from ReportGenerator import ReportGenerator
 from collections import defaultdict
+import logging
+import datetime
 
 
-def separate_promo_sheet(year, grades_dir='Grades/', filename=None):
+# Start a logger any time this file is imported
+logging.basicConfig(filename='logs/procedures-log {}.log'.format(datetime.datetime.now()), level=logging.DEBUG)
+
+
+def separate_promo_sheet(year, grades_dir='../Grades/', filename=None):
     """Separator for Engineering One promotion sheets
 
     Parses Engineering One promotion sheet and separates the data into different
@@ -122,10 +128,10 @@ def separate_promo_sheet(year, grades_dir='Grades/', filename=None):
             if temp != 'ENUD':
                 master_grades['Core'][course].append(grade_value)
 
+    #--------------------------------------------------------------------------
+    # Grade file exporting - apppends to files where possible
+    #--------------------------------------------------------------------------
 
-    #--------------------------------------------------------------------------
-    # Grade file exporting; attempts appending
-    #--------------------------------------------------------------------------
     print ("Grade loading is finished, exporting now")
     has_not_warned = True   # Safeguard for grade appending
     for p in eng_one_programs:
@@ -172,17 +178,21 @@ def separate_promo_sheet(year, grades_dir='Grades/', filename=None):
     print("PROCEDURE COMPLETE")
 
 
-def histogram_by_cohort(whitelist=None):
+def histogram_by_cohort(programs=None, whitelist=None):
     """Generate histograms by cohort
 
+    For more information, see the documentation on ReportGenerator
+
     Args:
+        programs: The same list of programs that gets passed to a
+            ReportGenerator object
         whitelist: The same form of whitelist that gets passed to a
             ReportGenerator object
     """
-    # Set up ReportConfig
+    # Set up ReportConfig with by_cohort configuration
     config = ReportConfig(config_file="by_cohort.json")
     # Set up ReportGenerator
-    gen = ReportGenerator(config=config, whitelist=whitelist)
+    gen = ReportGenerator(config=config, whitelist=whitelist, programs=programs)
     # Run autogeneration
     gen.autogenerate()
 
