@@ -98,6 +98,10 @@ def format_bin_ranges(bins, bin_labels):
 def get_cohort(year, course=None, term_taken=None):
     """Convert a year to equivalent cohort
 
+    The function cannot determine cohort for a work term course (i.e. ENGI 001W),
+    so it assumes that the column name passed to it is a cohort and will simply
+    return the year value passed back to it.
+
     Args:
         year: a number containing year and optionally, semester (which will be ignored)
             Examples: 2017, 201703, 2019
@@ -107,12 +111,6 @@ def get_cohort(year, course=None, term_taken=None):
 
     Returns:
         The equivalent cohort
-
-    Exceptions:
-        NotImplementedError: If the term_taken or the first number in the course
-            name is 0, that means that the course is a work term course. This
-            function does not have the necessary information to determine cohort
-            using just the year, term taken and course number.
     """
     # Find the first number that occurs in the course UNLESS the term_taken
     # variable is used
@@ -124,9 +122,9 @@ def get_cohort(year, course=None, term_taken=None):
     while year > 9999:
         year //= 10
 
-    # Co-op work term check - raise error if the course found is a co-op course
+    # Co-op work term check - returns year if the course found is a co-op course
     if term_taken == 0:
-        raise NotImplementedError()
+        return year
 
     cohort = year
     # Use conditionals to map the term to the cohort
@@ -142,3 +140,64 @@ def get_cohort(year, course=None, term_taken=None):
         cohort += 1
 
     return cohort
+
+
+def get_cohort_coop(year_and_semester, WT):
+    """Determine the cohort of a work term student
+
+    On a given work term, there can be 2 possible cohorts, and these can be
+    calculated. See the following example:
+
+     year and semester  |            cohort (work term numbers)
+    --------------------+---------------------------------------------------
+    Fall 2017 (201701)  |   2020(1-3) and 2018(4)
+    --------------------+---------------------------------------------------
+    Winter 2018 (201702)|   2021(1-2) and 2019(3-4)
+    --------------------+---------------------------------------------------
+    Spring 2018 (201703)|   2022(1) and 2020(2-4)
+    --------------------+---------------------------------------------------
+
+    The first possible cohort is year + semester + 2. See below:
+        2017 + 1 + 2 = 2020
+        2017 + 2 + 2 = 2021
+        2017 + 3 + 2 = 2022
+    The second possible cohort in a semester is just year + semester, or the
+    first possible cohort - 2.
+
+    There is a relation between semester and work term number associated with
+    a cohort. The semester indicates how many work terms belong to a cohort.
+        - If the semester number is 1, work terms 1-3 map to the first cohort
+        - If the semester number is 2, work terms 1-2 map to the first cohort
+        - If the semester number is 3, work term 1 maps to the first cohort
+
+    Args:
+        year_and_semester: Academic year format for when the work term was
+            taken (i.e. 201703)
+        WT: Student work term number (from 1 to 4)
+
+    Returns:
+        The cohort of the student
+
+    Exceptions:
+        ValueError: Raised when the function does not receive a  WT value from
+            1 to 4
+    """
+
+    # Split the year and semester into 2 separate values
+    year = year_and_semester // 100
+    semester = year_and_semester % 10
+
+    # Get the first possible and second possible cohorts
+    first_cohort = year + semester + 2
+
+    WTs = [1, 2, 3, 4]  # Possible work terms
+    if WT not in WTs:
+        raise ValueError
+
+    # Build a list of possible cohorts for the first semester
+    first_cohort_WTs = [WTs[i] for i in range(0, 4-semester)]
+
+    if WT in first_cohort_WTs:
+        return first_cohort
+    else:
+        return first_cohort - 2

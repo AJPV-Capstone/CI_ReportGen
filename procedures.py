@@ -6,6 +6,7 @@ import globals
 from ReportConfig import ReportConfig
 from ReportGenerator import ReportGenerator
 from collections import defaultdict
+import textformatting
 import logging
 import datetime
 
@@ -13,6 +14,106 @@ import datetime
 # Start a logger any time this file is imported
 logging.basicConfig(filename='logs/procedures-log {}.log'.format(datetime.datetime.now()), level=logging.DEBUG)
 
+
+def separate_coop_sheet(file, save_to='../Grades/'):
+    """Separate co-op date into appropriate spreadsheets
+
+    The function looks for co-op spreadsheets in "(save_to)/Co-op" and will
+    split them into files by work term number and question. It initially stores
+    the grades in a dictionary set up like dict[course][question][cohort] and
+    converts to Pandas DataFrames during saving, as DataFrames are immutable
+    and are not built to be appended to.
+
+    Args:
+        file: The name of the file to parse
+        save_to: The top directory to save grades to. Defaults to saving them
+            to a 'Grades' folder one directory above this one
+    """
+    print("Opening file {}".format(save_to + 'Co-op/' + file))
+    # Open the full sheet, skipping the first row that stores indicator information
+    full_sheet = pd.read_excel(save_to + 'Co-op/' + file, skiprows=1)
+
+    # Get the year and semester from the file name
+    year_and_semester = [int(s) for s in os.path.splitext(file)[0].split() if s.isdigit()][0]
+    print("Obtained year and semester as {}".format(str(year_and_semester)))
+
+    # Initialize nested defaultdicts to save the grades to.
+    # Grades only saved for ENGI 001W, 002W, 003W and 004W
+    # So that is hard-coded to increase parsing speed.
+    print("Setting up grades dictionaries")
+    grades_dict = {
+        'ENGI 001W': defaultdict(lambda: defaultdict(list)),
+        'ENGI 002W': defaultdict(lambda: defaultdict(list)),
+        'ENGI 003W': defaultdict(lambda: defaultdict(list)),
+        'ENGI 004W': defaultdict(lambda: defaultdict(list))
+    }
+    # Iterate across the rows of the big sheet
+    print("Beginning row iteration")
+    for i, row in full_sheet.iterrows():
+        # Iterate across the questions (aka the column names) of the row. The
+        # row is a Pandas Series, which stores the 'column names' in its
+        # 'index.names' attribute as an immutable object.
+        question_list = list(row.index)
+        question_list.remove('Work term')
+        for question in question_list:
+            print("Parsing question {}".format(question))
+            WT = row['Work term']   # Work term
+            try:
+                cohort = textformatting.get_cohort_coop(year_and_semester, WT)  # cohort
+            except ValueError:
+                print("Value received was not within 1-4, skipping row")
+                # ValueError will occur if the work term passed in isn't from 1 to 4.
+                # Skip this row if that occurs.
+                continue
+            # Append the question valut to the appropriate list. Example of dict call:
+            # grades_dict['ENGI 001W']['Initiative']['2021'].append(row['Initiative'])
+            grades_dict['ENGI 00{}W'.format(str(WT))][question][cohort].append(row[question])
+
+    # Start exporting the things
+    print("Beginning export")
+    for course in grades_dict.keys():
+        for question in grades_dict[course].keys():
+            # Format the save name
+            save_name = save_to + "Co-op/" + "{c} Employer Evaluation Form - {q} Question.xlsx".format(
+                    c = course, q = question
+            )
+            # Try to open a grades file: it's possible that one already exists
+            try:
+                old_file = pd.read_excel(save_name)
+                print("Found an old grades file, appending to that")
+                # If this works, we have appending to do. Convert the Excel file
+                # to a list-like dictionary, which is in the same format as what
+                # the current grades_dict is in
+                old_file = old_file.to_dict('list')
+                # Run a dictionary comparison. If a key from the new dict matches
+                # a key in the old file, append the two lists together. Otherwise,
+                # add the new cohort entry
+                for cohort in grades_dict[course][question].keys():
+                    if cohort in old_file.keys():
+                        print("Cohort {} already existed, appending lists".format(cohort))
+                        # Strip any null values from the list
+                        for x in old_file[cohort]:
+                            if pd.isnull(x):
+                                old_file[cohort].remove(x)
+                        old_file[cohort] += grades_dict[course][question][cohort]
+                    else:
+                        old_file[cohort] = grades_dict[course][question][cohort]
+                # Pandas requires all lists to have same length
+
+                # Convert the old file back into a DataFrame and save it
+                print("Saving file...")
+                # List comprehension converts lists to Series to avoid a DataFrame
+                # construction error
+                df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in old_file.items() ]))
+                df.to_excel(save_name, index=False)
+            except FileNotFoundError:
+                # Turn the question DataFrame into a dictionary, and let Pandas do its magic from there.
+                # Pandas will set up the grades dictionary to have column names by cohort, just like magic
+                print("Saving file...")
+                df = pd.DataFrame(grades_dict[course][question])
+                df.to_excel(save_name, index=False)
+
+    print("PROCEDURE COMPLETE")
 
 def separate_promo_sheet(year, grades_dir='../Grades/', filename=None):
     """Separator for Engineering One promotion sheets
