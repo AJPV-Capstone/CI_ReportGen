@@ -2,7 +2,7 @@
 
 # Temp import for testing
 import sys
-sys.path.insert(0, '/Users/ryanletto/Desktop/WT2/CI_ReportGen')
+sys.path.insert(0, '/Users/ryanletto/Desktop/WT2/memorial-ece ReportGen/CI_ReportGen')
 
 import textformatting as tf
 
@@ -16,7 +16,7 @@ bin_labels = [
 
 bins_standard = [0.0, 50.0, 60.0, 80.0, 100.0]
 bins_engone = [0.0, 55.0, 60.0, 80.0, 100.0]
-bins_coop = [1,2,3,4,5]
+bins_coop = [0,2,3,4,5]
 
 print("Bin ranges for standard")
 print(tf.format_bin_ranges(bins_standard,bin_labels))
