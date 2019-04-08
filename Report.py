@@ -7,6 +7,7 @@ import os
 from collections import defaultdict
 import numpy as np
 import logging
+import pandas as pd
 
 class Report(object):
     """Report Class
@@ -103,6 +104,14 @@ class Report(object):
         data = defaultdict()
         # Copy the bin ranges
         bins_copy = self.bins.copy()
+
+        # If the difference between the last 2 bins is 1, assume that these are
+        # co-op bins. If so, add 1 to each bin so that NumPy's histogram will
+        # work properly.
+        if bins_copy[len(bins_copy)-1] - bins_copy[len(bins_copy)-2] == 1:
+            for i in range (1, len(bins_copy)):
+                bins_copy[i] += 1
+
         # Also copy the bin labels
         bin_labels_copy = self.bin_labels.copy()
 
@@ -113,10 +122,17 @@ class Report(object):
         logging.debug("Bins being passed to NumPy histogram: %s", ', '.join(str(x) for x in bins_copy))
 
         # Histogram data by column
-        logging.info("Running NumPy histogram")
         for col in grades.columns:
+            # Determine the cohort size by removing the null values from the column
+            # that Pandas has to put there. The resulting list's length is used
+            figure_out_size = list()
+            for x in grades[col]:
+                if not pd.isnull(x):
+                    figure_out_size.append(x)
+            cohort_size = len(figure_out_size)
             # Add histogrammed grades to the data dict, converted to percentage
-            data[col] = np.histogram(grades[col], bins=bins_copy)[0] / len(grades[col]) * 100
+            logging.info("Running NumPy histogram")
+            data[col] = np.histogram(grades[col], bins=bins_copy)[0] / cohort_size * 100
             logging.debug("Data added to data[%s]:", col)
             logging.debug(', '.join(str(x) for x in data[col]))
 
@@ -224,7 +240,7 @@ class Report(object):
         """Add bin ranges to bottom of plot"""
         logging.info("Adding bin ranges to Report")
         self._annotations.append(go.layout.Annotation(
-            x=0.5, y=-self.config.font_sizes['legend_text']/100*1.5,
+            x=0.5, y=-self.config.font_sizes['legend_text']/100*1.7,
             showarrow=False,
             xref='paper',yref='paper',
             xanchor='center', yanchor='bottom',
@@ -268,4 +284,6 @@ class Report(object):
         # Add the annotations to the figure Layout
         self._append_annotations()
         fig = go.Figure(data = self.traces, layout = self.layout)
+        # Console print to show that the program is still running
+        print("Saving", savename)
         pio.write_image(fig, savename, format)

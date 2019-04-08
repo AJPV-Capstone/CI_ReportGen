@@ -63,10 +63,13 @@ def format_percents(values):
 def format_bin_ranges(bins, bin_labels):
     """Format bins into a text description
 
-    Currently, this does not format bin ranges properly for co-op data
+    Currently, this uses a fairly inelegant solution for formatting co-op bins.
+    If the difference between the first and last bin is 1, then the function
+    calls a different one and returns the results of that
 
     Args:
-        bins(list(int)): A list of integers representing bin ranges.
+        bins(list(int)): A list of integers representing bin ranges. Expects
+            to receive 5 numbers (i.e. [0, 55, 65, 80, 100])
         bin_labels(list(str)): A list of string titles for the bin categories.
             Uses the size of these bin labels to determine iteration
 
@@ -77,11 +80,15 @@ def format_bin_ranges(bins, bin_labels):
     size=len(bin_labels)
     logging.debug("Bin labels length is %s", size)
 
+    if bins[len(bins)-1] - bins[len(bins)-2] == 1:
+        logging.debug("Co-op bins detected, calling format_coop_bins")
+        return format_coop_bins(bins, bin_labels)
+
     bin_description = "Bin ranges: marks out of {:.0f}<br>".format(bins[size])
     # If the first bin is <=0, use a '<' sign to indicate the first bin
     if bins[0] <= 0:
         logging.debug("First bin was %s, adding a < sign", str(bins[0]))
-        bin_description += "<{:.0f}: {}   ".format(bins[0],bin_labels[0])
+        bin_description += "<{:.0f}: {}   ".format(bins[1],bin_labels[0])
     else:
         bin_description += "{:.0f}-{:.0f}: {}   ".format(bins[0],bins[1]-1,bin_labels[0])
 
@@ -94,6 +101,31 @@ def format_bin_ranges(bins, bin_labels):
 
     return bin_description
 
+
+def format_coop_bins(bins, bin_labels):
+    """Co-op bin label formatting
+
+    Co-op bins won't format like the standard formatting method. This function
+    handles the co-op binning exceptions
+
+    Args:
+        bins: The bin ranges. They are probably [0,2,3,4,5] if this function was
+            called, and the function will behave as if they were. This allows
+            for validation down the road if the binning message shows up really
+            weird and nonsensical on a histogram
+        bin_labels: The labels for the bins
+
+    Returns:
+        string: A string describing the bin ranges
+    """
+    size = len(bin_labels)
+    bin_description = "Bin ranges: marks out of 5<br>"
+    # Put a < sign for the first bin
+    bin_description += "<={:.0f}: {}   ".format(bins[1], bin_labels[0])
+    # Do remaining bins as
+    for i in range (1, size):
+        bin_description += "{:.0f}: {}   ".format(bins[i+1], bin_labels[i])
+    return bin_description
 
 def get_cohort(year, course=None, term_taken=None):
     """Convert a year to equivalent cohort
@@ -112,6 +144,8 @@ def get_cohort(year, course=None, term_taken=None):
     Returns:
         The equivalent cohort
     """
+    # Ensure that the value is an int
+    year = int(year)
     # Find the first number that occurs in the course UNLESS the term_taken
     # variable is used
     if not term_taken:
