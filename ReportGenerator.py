@@ -8,6 +8,7 @@ import os
 import numpy as np
 import logging
 import re
+import pandas as pd
 
 class ReportGenerator(object):
     """Report Generator Class
@@ -186,24 +187,28 @@ class ReportGenerator(object):
             self.ds.query_indicators(program=program, dict_of_queries=self.whitelist)
 
             # Get a list of files in the program's grades directory so that any
-            # special name tags can be taken into consideration
+            # special name tags can be taken into consideration. Set up as a
+            # dict so that it can be updated using the backup file dict from
+            # DataStore
             logging.info("Getting list of grade files in directory %s", self.config.grades_loc + program)
-            grade_files = os.listdir(self.config.grades_loc + program)
+            search_list = {program: os.listdir(self.config.grades_loc + program)}
+
+            logging.info("Creating a list hierarchy to deal with file backup things")
+            search_list.update(self.ds.backup_file_lists)
 
             # Set up a file to store missing data in
             logging.info("Starting a file to save missing data")
-            missing_data = open("logs/{} missing data.txt".format(program), "w+")
+            missing_data = open("../Missing Data/{} missing data.txt".format(program), "w+")
 
             # Iterate across each indicator (each row)
             logging.info("Beginning row iteration...")
-
             for i, row in self.ds.last_query.iterrows():
 
                 # Skip this row if no bins are defined
-                if row['Bins'] in [np.nan, None, '!', '!!', '!!!']:
-                    logging.warning("No bins found for {} {} {} {}, skipping row".format(row['Indicator #'], row['Level'],
-                        row['Course #'], row['Method of Assessment']))
-                    logging.warning("Missing binning Stored in separate file")
+                if row['Bins'] in [np.nan, None]:
+                    logging.warning("No bins (and likely no data) found for {} {} {} {}, skipping row".format(
+                            row['Indicator #'], row['Level'], row['Course #'], row['Method of Assessment']))
+                    logging.warning("Missing binning stored in separate file")
                     missing_data.write("Missing bin ranges for {a} {b} ({c}-{d})\n".format(a=row["Course #"],
                             b=row["Method of Assessment"], c=row['Indicator #'], d=row['Level']))
                     continue
@@ -217,32 +222,70 @@ class ReportGenerator(object):
                     logging.warning("ERROR: No useable bins for {} {} {} {}, skipping row".format(
                             row['Indicator #'], row['Level'], row['Course #'], row['Method of Assessment']
                     ))
+                    missing_data.write("No useable bins for {a} {b} ({c}-{d})\n".format(a=row["Course #"],
+                            b=row["Method of Assessment"], c=row['Indicator #'], d=row['Level']))
                     continue
 
-                indicator_data['Program'] = program
                 logging.debug("Indicator data obtained from the row: %s", str(indicator_data))
 
-                # Get the right data into a DataFrame
+                #-----------------------------------------------------------------------------
+                # Get the grades ready for the histogram
+                #-----------------------------------------------------------------------------
                 logging.info("Organizing the grades for this histogram now")
+
+                # Try to open the grades by searching the file lists using regular expressions
+                open_this=None
+                for key in search_list.keys():
+                    indicator_data['Program'] = key
+                    logging.debug("Searching the {} directory for grades for {} {}".format(
+                        key,
+                        indicator_data['Course'].split('-')[0].strip(),
+                        indicator_data['Assessment']
+                    ))
+                    for file in search_list[key]:
+                        # If statement searches the file string for the course
+                        # and assessment type
+                        x = re.search("{c} {a}".format(
+                            c=indicator_data['Course'].split('-')[0].strip(),
+                            a=indicator_data['Assessment']
+                        ).lower(), file.lower())
+                        logging.debug("Search for {} resulted in {}".format(file, x))
+                        if x != None:
+                            open_this = self.config.grades_loc + key + '/' + file
+                            break
+                    if open_this != None:
+                        break
+                logging.debug("Search resulted in %s", str(open_this))
+
                 if self.config.plot_grades_by != 'year':
                     raise NotImplementedError("Attempted to parse grades by a way that isn't year, which is currently not implemented")
                 else:
                     try:
-                        grades = grades_org.open_grades(row, program)
+                        # Try to open the grade file
+                        grades = grades_org.open_grades(row, program, file=open_this)
                     except Exception as exc:
                         logging.warning(str(exc) + '\n' + "Skipping course and continuing")
                         logging.warning("Missing data stored in separate file")
                         missing_data.write("Missing data for {a} {b} ({c}-{d})\n".format(a=row["Course #"],
                             b=row["Method of Assessment"], c=row['Indicator #'], d=row['Level']))
-
                         continue
-                # Rename the DataFrame columns by cohort for now
-                # Uses a long annoying list comprehension right now
+                # Rename the DataFrame columns by cohort for now. With new plot
+                # configurations, this can become some form of call
                 logging.info("Re-organizing the grade columns by changing their year to a cohort message")
-                grades.columns = ["{}COHORT-{} STUDENTS".format(
-                    tf.get_cohort(i, course=indicator_data['Course'].split(' - ')[0]),
-                    grades[i].size) for i in grades.columns
-                ]
+                renamed_columns = list()
+                for col in grades.columns:
+                    # Get the real size of the grade column by stripping out null values
+                    figure_out_size = list()
+                    for x in grades[col]:
+                        if not pd.isnull(x):
+                            figure_out_size.append(x)
+                    cohort_size = len(figure_out_size)
+                    renamed_columns.append("{}COHORT-{} STUDENTS".format(
+                        tf.get_cohort(col, course=indicator_data['Course'].split(' - ')[0]),
+                        cohort_size
+                    ))
+                grades.columns = renamed_columns
+
                 # Generate Report and add annotations depending on configuration
                 logging.info("Setting up Report object")
                 report = Report(indicator_data, bins, self.config)

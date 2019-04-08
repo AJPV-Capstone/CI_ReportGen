@@ -21,6 +21,10 @@ class DataStore(object):
             DataFrame
         indicators_loc: The location of the indicator sheets
         grades_loc: The top folder for the grade storage
+        backup_file_lists: A dict of lists that stores the file names in the
+            "Core" and "Co-op" grades subdirectories These lists are typically
+            used as backup when the program cannot properly identify the right
+            file in the normal directory.
     """
 
 
@@ -75,6 +79,12 @@ class DataStore(object):
             self.indicators_loc = pth
         else:
             self.grades_loc = grades_loc
+
+        logging.info("Storing file lists of the Core and Co-op directories")
+        self.backup_file_lists = {
+            'Core': os.listdir(self.grades_loc + 'Core/'),
+            'Co-op': os.listdir(self.grades_loc + 'Co-op/')
+        }
 
         logging.info("DataStore object initialization complete!")
 
