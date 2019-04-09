@@ -80,10 +80,11 @@ class DataStore(object):
         else:
             self.grades_loc = grades_loc
 
-        logging.info("Storing file lists of the Core and Co-op directories")
+        logging.info("Storing file lists of the Core, Co-op and ECE directories")
         self.backup_file_lists = {
             'Core': os.listdir(self.grades_loc + 'Core/'),
-            'Co-op': os.listdir(self.grades_loc + 'Co-op/')
+            'Co-op': os.listdir(self.grades_loc + 'Co-op/'),
+            'ECE': os.listdir(self.grades_loc + 'ECE/')
         }
 
         logging.info("DataStore object initialization complete!")
