@@ -1,11 +1,11 @@
-#!/usr/bin/env python3
-'''
+"""DEPRECATED
+
 Sets up the directories for Grades spreadsheets
 
 Results:
     Creates a folder hierarchy in Grades which creates folders for each
     program and folders for core and co-op.
-'''
+"""
 
 def Create_Directories():
     # Imports
@@ -24,7 +24,3 @@ def Create_Directories():
 
     # Add the histograms folder
     os.makedirs("Histograms", exist_ok=True)
-
-# Line added here to make the script equivalent to an executable
-Create_Directories()
-print("Directories created")
