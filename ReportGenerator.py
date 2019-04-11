@@ -18,17 +18,18 @@ class ReportGenerator(object):
 
     Attributes:
         config: A ReportConfig object
+        programs: A list of programs to process
         whitelist: A dictionary including lists of the only things that should
             be processed. Options can include, but are not limited to, lists of:
-            - programs
             - courses
             - indicators
             - assessments
+            As long as the whitelist key matches closely to the column name in
+            the indicator lookup table, it should be fine
         ds: A DataStore object
 
         Todo:
             - Implement a blacklisting feature
-            - Update the attributes in this docstring
     """
 
 
@@ -60,10 +61,6 @@ class ReportGenerator(object):
                 to uniquely parse. Defaults to no whitelist
             ds: A DataStore object. Defaults to generating one based on the
                 whitelist entries for 'programs'
-
-            Todo:
-                - Code the whitelisting better so that the program doesn't just crash
-                  if you don't give it a whitelist
         """
         logging.info("Start of AutoGenerator initialization")
         logging.info("Initializing ReportConfig")
