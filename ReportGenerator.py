@@ -75,6 +75,7 @@ class ReportGenerator(object):
         if not self.programs:
             self.programs = globals.all_programs
         logging.debug("Programs: %s", ', '.join(self.programs))
+        logging.debug("Type of programs: %s", type(self.programs))
 
         # If any of the file location parameters were passed in, overwrite what
         # the ReportConfig object has
@@ -139,7 +140,7 @@ class ReportGenerator(object):
         # Convert the comma-separated string into dictionary keys
         logging.info("Creating a dictionary of indicator information")
         indicator_dict = {i:"" for i in [x.strip() for x in self.config.header_attribs.split(',')]}
-        logging.debug("Indicator dictionary keys obtained from following header_attribs: %s",
+        logging.debug("Indicator dictionary keys obtained from following header_attribs:\n %s",
             ', '.join(self.config.header_attribs.split(',')))
         logging.debug("Indicator dictionary keys: %s", ', '.join(indicator_dict.keys()))
 
@@ -170,8 +171,7 @@ class ReportGenerator(object):
         # with the way that autogeneration iterates
         logging.debug("Autogenerator set to plot grades by %s from ReportConfig", self.config.plot_grades_by)
         if self.config.plot_grades_by != 'year':
-            # Select a specific indicator sheet to query
-            iterprograms = [self.config.use_indicators_from]
+            raise NotImplementedError("Cannot plot grades by any type other than year")
         else:
             iterprograms = self.ds.programs
         logging.debug("Autogenerator set up to use programs: %s", ', '.join(iterprograms))
@@ -240,8 +240,8 @@ class ReportGenerator(object):
                         indicator_data['Assessment']
                     ))
                     for file in search_list[key]:
-                        # If statement searches the file string for the course
-                        # and assessment type
+                        # Search the file string for the course and assessment type.
+                        # Sets file names to lowercase to avoid any caps errors
                         x = re.search("{c} {a}".format(
                             c=indicator_data['Course'].split('-')[0].strip(),
                             a=indicator_data['Assessment']
@@ -255,17 +255,35 @@ class ReportGenerator(object):
                 logging.debug("Search resulted in %s", str(open_this))
 
                 if self.config.plot_grades_by != 'year':
-                    raise NotImplementedError("Attempted to parse grades by a way that isn't year, which is currently not implemented")
+                    raise NotImplementedError("Attempted to parse grades by a way that isn't year, which is not currently implemented")
                 else:
                     try:
                         # Try to open the grade file
                         grades = grades_org.open_grades(row, program, file=open_this)
                     except Exception as exc:
+                        # Skip the file if it doesn't open
                         logging.warning(str(exc) + '\n' + "Skipping course and continuing")
                         logging.warning("Missing data stored in separate file")
+                        # Add course, assessment type and indicator to missing data file
                         missing_data.write("Missing data for {a} {b} ({c}-{d})\n".format(a=row["Course #"],
                             b=row["Method of Assessment"], c=row['Indicator #'], d=row['Level']))
                         continue
+
+                # Check the list of unique courses to see if the current course is in it.
+                # If it is, then the course is unique in some way.
+                term_offered = None
+                for i, unique_course in self.ds.unique_courses.iterrows():
+                    if row['Course #'] == unique_course['Course #']:
+                        term_offered = unique_course['Term Offered']
+
+                # Rename the DataFrame columns by cohort
+                grades.columns = grades_org.cols_to_cohorts(
+                    grades=grades,
+                    course_name = row['Course #'],
+                    course_term_offered = term_offered
+                )
+
+                '''
                 # Rename the DataFrame columns by cohort for now. With new plot
                 # configurations, this can become some form of call
                 logging.info("Re-organizing the grade columns by changing their year to a cohort message")
@@ -282,6 +300,7 @@ class ReportGenerator(object):
                         cohort_size
                     ))
                 grades.columns = renamed_columns
+                '''
 
                 # Generate Report and add annotations depending on configuration
                 logging.info("Setting up Report object")

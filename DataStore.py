@@ -25,6 +25,15 @@ class DataStore(object):
             "Core" and "Co-op" grades subdirectories These lists are typically
             used as backup when the program cannot properly identify the right
             file in the normal directory.
+        unique_courses: A Pandas DataFrame that contains information on courses
+            that do not follow the standard term offered rule. Usually, the first
+            integer in a course tag (i.e. ENGI 3424) indicates the term that course
+            is offered. However, some courses like CHEM 1051 are taken in term 3.
+            Any courses that do not have grades stored by academic year and term
+            offered should also be in this table (i.e. MATH 2000 was pulled from
+            Banner, and the grades are stored by cohort). Loaded from an Excel
+            file that the object looks for one directory above this one called
+            "Unique Courses.xlsx"
     """
 
 
@@ -87,6 +96,9 @@ class DataStore(object):
             'ECE': os.listdir(self.grades_loc + 'ECE/')
         }
 
+        logging.info("Opening the Unique Courses file")
+        self.unique_courses = pd.read_excel(os.path.dirname(__file__) + '/../Unique Courses.xlsx')
+
         logging.info("DataStore object initialization complete!")
 
 
@@ -108,6 +120,7 @@ class DataStore(object):
             DataFrame: The DataFrame query
         """
         logging.info("Start of query_indicators method")
+        # Try to set the last query to the indicators
         try:
             self.last_query = self.indicators[program]
         except KeyError:
