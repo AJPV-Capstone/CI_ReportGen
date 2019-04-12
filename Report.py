@@ -135,6 +135,7 @@ class Report(object):
             data[col] = np.histogram(grades[col], bins=bins_copy)[0] / cohort_size * 100
             logging.debug("Data added to data[%s]:", col)
             logging.debug(', '.join(str(x) for x in data[col]))
+            logging.debug('bins are %s', ', '.join(str(x) for x in bins_copy))
 
         # Check the NDA percentages and determine if NDA should be shown
         logging.info("Checking to see if NDA should be removed")
@@ -201,7 +202,7 @@ class Report(object):
         """Add the header information to the annotations list"""
         # Get the text to add to the graph
         logging.info("Adding header to Report")
-        labels, descriptions, title = tf.format_annotation_text(self.indicator_data)
+        labels, descriptions, title = tf.format_annotation_text(self.indicator_data, self.config.textwrap_lim)
         self._annotations += [
             # GA
             go.layout.Annotation(

@@ -15,5 +15,6 @@
     "header_attribs": "Graduate Attribute, Indicator, Level, Program, Course, Assessment",
     "header_xloc": 0.33,
     "header_yloc": 1.9,
-    "graph_title": "GRADE DISTRIBUTION"
+    "graph_title": "GRADE DISTRIBUTION",
+    "textwrap_lim": 72
 }

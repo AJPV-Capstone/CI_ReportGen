@@ -81,9 +81,9 @@ class ReportConfig(object):
         # Set up font sizes and paper dimensions
         logging.info("Setting up font sizes")
         self.font_sizes = {
-            'graph_title': self.annotation_font*1.5,
+            'graph_title': self.annotation_font*1.2,
             'yaxis_title': self.annotation_font,
-            'GA_text': self.annotation_font*2,
+            'GA_text': self.annotation_font*1.5,
             'annotations': self.annotation_font,
             'axis_labels': int(self.annotation_font/1.2),
             'barcounts': int(self.annotation_font/1.2),

@@ -3,13 +3,14 @@ import textwrap
 import re
 import logging
 
-def format_annotation_text(header_info):
+def format_annotation_text(header_info, textwrap_lim=60):
     """Create a table-like format for the header text on a Report
 
     Args:
         header_info: A dictionary containing all of the elements that you want
             to show on the Report. The only required entry in the dictionary is
             "Graduate Attribute," the others are optional
+        textwrap_lim: The character limit on text wrapping. Defaults to 60
 
     Returns:
         string: The 'labels' for the elements to graph, separated by HTML line
@@ -31,7 +32,7 @@ def format_annotation_text(header_info):
         logging.debug("Cleaning up %s", key)
         # Use textwrap to paragraphize the passed in text, with each line stored in a list
         label_list += textwrap.wrap(key + ':', width=12)
-        description_list += textwrap.wrap(header_info[key], width=60)
+        description_list += textwrap.wrap(header_info[key], width=textwrap_lim)
 
         # If the number of lines in each list is not equal, add empty strings until they are equal
         difference = len(label_list) - len(description_list)
@@ -146,9 +147,8 @@ def get_cohort(year, course=None, term_taken=None):
     """
     # Ensure that the value is an int
     year = int(year)
-    # Find the first number that occurs in the course UNLESS the term_taken
-    # variable is used
-    if not term_taken:
+    # If term_taken was not passed to the function, find it using the course number
+    if term_taken == None:
         term_taken = int(re.search("\d", course).group(0))
 
     # If term is included, split the year off of it via repeated int division
@@ -156,7 +156,7 @@ def get_cohort(year, course=None, term_taken=None):
     while year > 9999:
         year //= 10
 
-    # Co-op work term check - returns year if the course found is a co-op course
+    # Unique check - returns year if the course found has term_offered = 0
     if term_taken == 0:
         return year
 

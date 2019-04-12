@@ -32,21 +32,24 @@ import json
 import os
 
 default = {
-    'name': 'default',
-    'annotation_font': 16,
-    'dpi': 150,
-    'orientation': 'landscape',
-    'format': 'pdf',
-    'max_plots': 5,
-    'add_percents': True,
-    'add_legend': True,
-    'show_NDA': True,
-    'NDA_threshold': 0.10,
-    'header_attribs': 'Graduate Attribute, Indicator, Level, Program, Course, Assessment',
-    'header_xloc': 0.33,
-    'header_yloc': 1.9,
-    'add_title': True,
-    'graph_title': 'GRADE DISTRIBUTION'
+    "name": "default",
+    "plot_grades_by": "year",
+    "annotation_font": 16,
+    "dpi": 150,
+    "orientation": "landscape",
+    "format": "pdf",
+    "max_plots": 5,
+    "add_title": true,
+    "add_percents": true,
+    "add_legend": true,
+    "add_bin_ranges": true,
+    "show_NDA": true,
+    "NDA_threshold": 0.1,
+    "header_attribs": "Graduate Attribute, Indicator, Level, Program, Course, Assessment",
+    "header_xloc": 0.33,
+    "header_yloc": 1.9,
+    "graph_title": "GRADE DISTRIBUTION",
+    "textwrap_lim": 72
 }
 
 f = open('../config/default.json', 'w+')
