@@ -10,7 +10,8 @@ import textformatting
 import logging
 import datetime
 
-
+# Make sure that the logs directory exists
+os.makedirs('logs', exist_ok=True)
 # Start a logger any time this file is imported
 logging.basicConfig(filename='logs/procedures-log {}.log'.format(datetime.datetime.now()), level=logging.DEBUG)
 
