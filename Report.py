@@ -125,14 +125,23 @@ class Report(object):
         for col in grades.columns:
             # Determine the cohort size by removing the null values from the column
             # that Pandas has to put there. The resulting list's length is used
-            figure_out_size = list()
+            data_to_histogram = list()
             for x in grades[col]:
                 if not pd.isnull(x):
-                    figure_out_size.append(x)
-            cohort_size = len(figure_out_size)
+                    data_to_histogram.append(x)
+                # Raise an error if the value is a string type because NumPy will
+                # just complain anyways
+                if isinstance(x, type('string')):
+                    error = "A value in the {} grades for {} {} is not a number. Please fix and try again.".format(
+                        self.indicator_data['Program'],
+                        self.indicator_data['Course'],
+                        self.indicator_data['Assessment']
+                    )
+                    raise ValueError(error)
+            cohort_size = len(data_to_histogram)
             # Add histogrammed grades to the data dict, converted to percentage
             logging.info("Running NumPy histogram")
-            data[col] = np.histogram(grades[col], bins=bins_copy)[0] / cohort_size * 100
+            data[col] = np.histogram(data_to_histogram, bins=bins_copy)[0] / cohort_size * 100
             logging.debug("Data added to data[%s]:", col)
             logging.debug(', '.join(str(x) for x in data[col]))
             logging.debug('bins are %s', ', '.join(str(x) for x in bins_copy))
