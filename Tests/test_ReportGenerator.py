@@ -6,7 +6,8 @@ Todo:
 
 # Temp import for testing
 import sys
-sys.path.insert(0, '/Users/ryanletto/Desktop/WT2/CI_ReportGen')
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/..')
 
 from ReportGenerator import ReportGenerator
 from ReportConfig import ReportConfig

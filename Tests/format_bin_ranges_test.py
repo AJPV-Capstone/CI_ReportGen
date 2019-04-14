@@ -2,7 +2,8 @@
 
 # Temp import for testing
 import sys
-sys.path.insert(0, '/Users/ryanletto/Desktop/WT2/memorial-ece ReportGen/CI_ReportGen')
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/..')
 
 import textformatting as tf
 

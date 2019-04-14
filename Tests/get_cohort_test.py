@@ -1,7 +1,8 @@
 """Test for the get_cohort function"""
 # Temp import for testing
 import sys
-sys.path.insert(0, '/Users/ryanletto/Desktop/WT2/CI_ReportGen')
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/..')
 
 from textformatting import get_cohort
 
