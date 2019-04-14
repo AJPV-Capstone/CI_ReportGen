@@ -97,7 +97,8 @@ class ReportGenerator(object):
                     grades_loc=self.config.grades_loc)
 
         # Make sure that the histograms folder exists as the program writes to it
-        logging.info("Ensuring that the histograms directory exists")
+        logging.info("Setting up output directories (Missing Data & Histograms)")
+        os.makedirs(os.path.dirname(__file__) + '/../Missing Data', exist_ok=True)
         os.makedirs(self.config.histograms_loc, exist_ok=True)
 
         logging.info("ReportGenerator initialization done!")
@@ -246,7 +247,7 @@ class ReportGenerator(object):
                             c=indicator_data['Course'].split('-')[0].strip(),
                             a=indicator_data['Assessment']
                         ).lower(), file.lower())
-                        logging.debug("Search for {} resulted in {}".format(file, x))
+                        logging.debug("Match with {} resulted in {}".format(file, x))
                         if x != None:
                             open_this = self.config.grades_loc + key + '/' + file
                             break
