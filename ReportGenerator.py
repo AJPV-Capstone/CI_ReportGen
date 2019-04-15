@@ -241,16 +241,27 @@ class ReportGenerator(object):
                         indicator_data['Assessment']
                     ))
                     for file in search_list[key]:
+                        #--------------------------------------------------------------------
                         # Search the file string for the course and assessment type.
-                        # Sets file names to lowercase to avoid any caps errors
-                        x = re.search("{c} {a}".format(
-                            c=indicator_data['Course'].split('-')[0].strip(),
-                            a=indicator_data['Assessment']
-                        ).lower(), file.lower())
-                        logging.debug("Match with {} resulted in {}".format(file, x))
-                        if x != None:
+                        #
+                        # Looks for the course number appearing as the first thing in the
+                        # file name, the assessment type being directly after, and a .xlsx
+                        # at the very end.
+                        #--------------------------------------------------------------------
+
+                        searches = list()
+                        logging.debug("Checking file %s", file)
+                        searches.append(file.lower().startswith("{}".format(indicator_data['Course'].split('-')[0].strip().lower())))
+                        logging.debug("Search for course # resulted in %s", str(searches[0]))
+                        searches.append(file.lower().find(indicator_data['Assessment'].lower()) != -1)
+                        logging.debug("Search for assessment resulted in %s", str(searches[1]))
+                        searches.append(file.endswith(".xlsx"))
+                        logging.debug("Search for .xlsx resulted in %s", str(searches[2]))
+
+                        if all (results for results in searches):
                             open_this = self.config.grades_loc + key + '/' + file
                             break
+
                     if open_this != None:
                         break
                 logging.debug("Search resulted in %s", str(open_this))
