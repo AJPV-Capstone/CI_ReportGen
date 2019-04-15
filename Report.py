@@ -38,15 +38,16 @@ class Report(object):
         """Object initialization
 
         Args:
-            indicator_data: A dictionary containing GA, Indicator, Level,
-                Program, Course, and Assessment
-            bins: A list of floats containing bin ranges
+            indicator_data: A dictionary containing relevant indicator data to
+                plot. The only required entry to the dictionary is Graduate
+                Attribute, the others are optional. For more information, see
+                textformatting.format_annotation_text
+            bins: A list of floats containing bin ranges that comes from the
+                indicator lookup tables. What that means is that the program
+                expects to recieve 4 values (i.e. [55.0, 65.0, 80.0, 100.0])
             config: a ReportConfig object reference that the object uses
                 to configure various parameters. Uses a default config if
                 none is passed as an argument
-
-        Todo:
-            - Write this docstring
         """
         logging.info("Initializing Report object")
         logging.debug("Report being initialized with bins: %s", bins)
@@ -94,10 +95,6 @@ class Report(object):
             grades: A pandas DataFrame storing the grades that need to be plotted.
                 The program will use the column names of the DataFrame as the legend
                 entries
-
-        Todo:
-            - Clean up the NDA filtering thing (idea: do the threshold check in
-              the np.histogram for loop)
         """
         logging.info("Setting up required resources for plotting")
         # Store the data in dicts of NumPy arrays before converting to barcharts
@@ -121,10 +118,10 @@ class Report(object):
             bins_copy = [-1.0] + bins_copy
         logging.debug("Bins being passed to NumPy histogram: %s", ', '.join(str(x) for x in bins_copy))
 
-        # Histogram data by column
+        # Histogram data by column and simultaneously check if NDA entries need to be removed
+        delete_NDA = True
         for col in grades.columns:
-            # Determine the cohort size by removing the null values from the column
-            # that Pandas has to put there. The resulting list's length is used
+            # Remove null values from the column that Pandas has to put there
             data_to_histogram = list()
             for x in grades[col]:
                 if not pd.isnull(x):
@@ -138,36 +135,32 @@ class Report(object):
                         self.indicator_data['Assessment']
                     )
                     raise ValueError(error)
-            cohort_size = len(data_to_histogram)
             # Add histogrammed grades to the data dict, converted to percentage
             logging.info("Running NumPy histogram")
-            data[col] = np.histogram(data_to_histogram, bins=bins_copy)[0] / cohort_size * 100
-            logging.debug("Data added to data[%s]:", col)
-            logging.debug(', '.join(str(x) for x in data[col]))
-            logging.debug('bins are %s', ', '.join(str(x) for x in bins_copy))
-
-        # Check the NDA percentages and determine if NDA should be shown
-        logging.info("Checking to see if NDA should be removed")
-        if self.config.show_NDA == True:
-            logging.info("Show NDA is True, so check is going ahead. NDA threshold: %s", str(self.config.NDA_threshold))
-            delete_NDA = True
-            # First pass determines if any of the bins are above the threshold
-            logging.info("Performing first pass over data to check if any bins are above threshold")
-            for key in data.keys():
-                # If any NDA bins are above the threshold, don't delete them
-                if data[key][0] >= self.config.NDA_threshold*100:
-                    delete_NDA = False
-                    logging.debug("The NDA value from key %s exceeded the threshold, so NDA will not be stripped", key)
-                    logging.debug("That value was %s", str(data[key][0]))
-                    # Add NDA bin label to front
+            data[col] = np.histogram(data_to_histogram, bins=bins_copy)[0] / len(data_to_histogram) * 100
+            logging.debug("Data added to data[%s]: %s", col, ', '.join(str(x) for x in data[col]))
+            # Check to see if the NDA value in this data entry exceeds the NDA threshold
+            if self.config.show_NDA == True and delete_NDA == True:
+                logging.info("Show NDA is True, therefore checking to see if threshold is exceeded. NDA threshold: %s", str(self.config.NDA_threshold))
+                if data[col][0] >= self.config.NDA_threshold*100:
+                    logging.debug("Threshold exceeded!")
+                    # Add the 'No Data Available' bin label
                     bin_labels_copy = ["No Data Available"] + bin_labels_copy
-                    break
+                    delete_NDA = False
 
-            if delete_NDA == True:
-                logging.info("No value exceeded the threshold, so NDA bins will be stripped")
-                # Second pass will remove the NDA bins if they have to be removed
-                for key in data.keys():
-                    data[key] = np.delete(data[key], 0)
+        # Remove the NDA bins if they have to be removed
+        if delete_NDA == True:
+            logging.info("No value exceeded the threshold, so NDA bins will be stripped")
+            for key in data.keys():
+                data[key] = np.delete(data[key], 0)
+
+        # Check to see if the number of maximum plots was exceeded
+        if len(data) > self.config.max_plots:
+            logging.warning("The number of plots for this histogram exceeded the threshold in ReportConfig!")
+            # Remove data plots by first occurence in the list of keys
+            while len(data) > self.config.max_plots:
+                removed = data.pop(data.keys()[0])
+                logging.warning("Removed data set for %s", removed)
 
         # Bar the data
         logging.info("Barring the data now")
@@ -267,7 +260,7 @@ class Report(object):
         Args:
             cohort: The cohort to add to the title, assuming that the title
                 string in the ReportConfig is a formatted string. Defaults
-                to empty
+                to an empty string
         """
         logging.info("Adding title to graph on the Report")
         self._annotations.append(go.layout.Annotation(
@@ -293,6 +286,7 @@ class Report(object):
         logging.info("Saving Report in %s format", format)
         # Add the annotations to the figure Layout
         self._append_annotations()
+        # Create a Plotly figure
         fig = go.Figure(data = self.traces, layout = self.layout)
         # Console print to show that the program is still running
         print("Saving", savename)

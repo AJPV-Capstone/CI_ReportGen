@@ -1,4 +1,10 @@
-"""Useful functions that should probably be methods somewhere but I dunno where to put them"""
+"""DEPRECATED
+
+This used to be a file to put useful functions that didn't have a home. All of
+these have since moved out, but were kept around just in case the code was
+needed someday.
+
+"""
 import os
 import re
 import pandas as pd
