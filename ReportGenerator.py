@@ -48,7 +48,6 @@ class ReportGenerator(object):
             histograms_loc: The location to store histograms. Defaults to using
                 a "Histograms" folder in the directory above the project (see
                 ReportConfig documentation for more info)
-
             year: The academic year that data is being parsed for, or in some cases
                 depending on config, the cap year on grade generation. Defaults
                 to None
@@ -133,7 +132,7 @@ class ReportGenerator(object):
         # Handle the bins first since those are easy
         try:
             bins = [float(x) for x in row['Bins'].split(',')]
-        except Exception as exc:
+        except Exception:
             logging.warning("ERROR: Non-number bins encountered in a lookup table")
             return None, None
         logging.debug("Bins parsed as:\t%s", ', '.join(str(x) for x in bins))
@@ -174,7 +173,7 @@ class ReportGenerator(object):
         if self.config.plot_grades_by != 'year':
             raise NotImplementedError("Cannot plot grades by any type other than year")
         else:
-            iterprograms = self.ds.programs
+            iterprograms = self.programs
         logging.debug("Autogenerator set up to use programs: %s", ', '.join(iterprograms))
 
         # Iterate across the list of programs

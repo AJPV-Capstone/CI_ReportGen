@@ -13,7 +13,6 @@ class DataStore(object):
     indicator info, grades, and so on.
 
     Attributes:
-        programs: A list of programs that the DataStore object
         indicators: A dictionary of Pandas DataFrames that store the master indicator
             lists for each program. These are typically loaded as needed to avoid
             unnecessary memory usage
@@ -60,26 +59,21 @@ class DataStore(object):
         else:
             self.indicators_loc = indicators_loc
 
-        logging.info("Setting up internal program list")
-        if not programs:
-            logging.debug("No program list passed to the constructor - using all programs")
-            self.programs = globals.all_programs.copy()
-        else:
-            self.programs = programs
-
-        logging.info("Loading indicator lookup tables now")
+        logging.info("Loading indicator lookup tables from programs list")
         self.indicators = defaultdict()
         filestring = "{} Indicators.xlsx" # Formatted string to open indicator files with
-        for p in self.programs:
-            # Try-except will prevent complete program crash when it doesn't find an
-            # Indicator
-            try:
-                logging.debug("Attempting to load indicators for %s using file %s",
-                        p, self.indicators_loc + filestring.format(p))
-                self.indicators[p] = pd.read_excel(self.indicators_loc + filestring.format(p))
-            except FileNotFoundError:
-                logging.warning("The file %s was not found, therefore no indicators were loaded for it.",
-                        self.indicators_loc + filestring.format(p))
+
+        # Get a list of programs to open indicator files for
+        if not programs:
+            logging.debug("No program list passed to the constructor - using all programs")
+            programs = globals.all_programs.copy()
+        
+        # Iterate across the programs list and load the indicator files
+        for p in programs:
+            logging.debug("Attempting to load indicators for %s using file %s",
+                p, self.indicators_loc + filestring.format(p)
+            )
+            self.indicators[p] = pd.read_excel(self.indicators_loc + filestring.format(p))
 
         logging.info("Setting up location to find grades")
         if not grades_loc:
@@ -124,10 +118,10 @@ class DataStore(object):
         try:
             self.last_query = self.indicators[program]
         except KeyError:
-            logging.warning("Indicators for", program, "apparently not loaded. Loading now")
-            self.indicators[p] = pd.read_excel(self.indicators_loc + filestring.format(p))
+            logging.warning("Indicators for %s apparently not loaded. Loading now...", program)
+            self.indicators[program] = pd.read_excel(self.indicators_loc + "/{} Indicators.xlsx".format(program))
             self.last_query = self.indicators[program]
-
+        
         # Query iteratively using the dict keys
         if dict_of_queries:
             for key in dict_of_queries.keys():
