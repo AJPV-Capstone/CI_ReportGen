@@ -1,7 +1,13 @@
 """Plot by cohort test using the ReportGenerator object
 
-Todo:
-    - Make all of the method calls more verbose for easier error tracking
+Author: Ryan Letto (rmletto)
+Last Modified: Apr. 18, 2019
+
+Changes:
+    Apr. 18, 2019 (rmletto): Realized that since these tests may deprecate automatically,
+        I should document when they change. As of today, this one should run and work
+        as intended (not tested). However, most of this code was implemeted as part of
+        procedures.histogram_by_cohort() some time ago, so it's fairly useless now
 """
 
 # Temp import for testing
