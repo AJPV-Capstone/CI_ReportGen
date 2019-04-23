@@ -80,7 +80,7 @@ class ReportConfig(object):
         """
         logging.info("Start of ReportConfig initialization")
         if not config_path:
-            config_path = os.path.dirname(__file__) + '/config/'
+            config_path = os.path.dirname(__file__) + '/config'
             logging.debug("Config path not specified, using %s", config_path)
 
         logging.info("Setting up paper dimensions")
@@ -97,19 +97,19 @@ class ReportConfig(object):
 
         # Set up paths to directories
         logging.info("Setting default directories to find indicators, grades and histograms")
-        self.indicators_loc = os.path.dirname(__file__) + '/../Indicators/'
-        self.grades_loc = os.path.dirname(__file__) + '/../Grades/'
-        self.histograms_loc = os.path.dirname(__file__) + '/../Histograms/'
+        self.indicators_loc = os.path.dirname(__file__) + '/../Indicators'
+        self.grades_loc = os.path.dirname(__file__) + '/../Grades'
+        self.histograms_loc = os.path.dirname(__file__) + '/../Histograms'
 
         # Load default config file and set attributes based on its contents
         logging.info("Setting attributes from default.json")
-        default = json.load(open(config_path + 'default.json'))
+        default = json.load(open(config_path + '/' + 'default.json'))
         for key in default:
             setattr(self, key, default[key])
 
         # Overwrite default options with the passed in config file if necessary
         if config_file:
-            new_attribs = json.load(open(config_path + config_file))
+            new_attribs = json.load(open(config_path + '/' + config_file))
             logging.info("Overriding attributes using config file %s", config_file)
             for key in new_attribs:
                 setattr(self, key, new_attribs[key])
