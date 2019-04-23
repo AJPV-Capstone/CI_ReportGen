@@ -1,4 +1,14 @@
-"""Plot by cohort test"""
+"""Plot by cohort test
+
+Author: Ryan Letto (rmletto)
+Last Modified: Apr. 18, 2019
+
+Changes:
+    Apr. 18, 2019 (rmletto): Realized that since these tests may deprecate automatically,
+        I should document when they change. As of today, this one does not run and can
+        be considered deprecated.
+
+"""
 
 # Temp import for testing
 import sys
