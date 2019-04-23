@@ -1,4 +1,9 @@
-"""Grades organization functions"""
+"""Grades organization functions
+
+This file, along with DataStore.py, are designed to be eventyally replaced by a
+proper database interface. Some of the functions may be able to carry over.
+
+"""
 import pandas as pd
 import numpy as np
 import os
@@ -66,18 +71,108 @@ def cols_to_cohorts(grades, course_name, course_term_offered=None):
     logging.info("Re-organizing the grade columns by changing their year to a cohort message")
     renamed_columns = list()
     for col in grades.columns:
-        # Get the real size of the grade column by putting non-null values in a
-        # new list and using that list's size
-        figure_out_size = list()
-        # Iterate through the grades of the DataFrame column
-        for x in grades[col]:
-            # Append to figure_out_size as long as the value isn't null
-            # according to Pandas
-            if not pd.isnull(x):
-                figure_out_size.append(x)
-        cohort_size = len(figure_out_size)
+        # Get the real size of the grade column (size without Null values)
+        cohort_size = true_size(grades[col])
         renamed_columns.append("{}COHORT-{} STUDENTS".format(
             tf.get_cohort(col, course=course_name, term_taken = course_term_offered),
             cohort_size
         ))
     return renamed_columns
+
+
+def true_size(ser):
+    """Obtains the true size of a Pandas Series
+    
+    When getting the size of a Pandas Series, any NaN or Null entries are considered
+    in the count. This becomes problematic when getting student counts because Pandas
+    has to append Null values to the end of DataFrame columns when the columns are not
+    the same size. As a result, all cohorts end up being the same size, even though
+    that's not true. This function strips out the null values and returns the true size
+    of the list. As a note, 0's are not stripped from the list; what gets stripped is
+    determined by pd.isnull()
+
+    Args:
+        ser: A Pandas Series
+
+    Returns:
+        int: The size of the Pandas Series without null values
+    """
+    figure_out_size = list()
+    # Iterate through the values of the Series
+    for x in ser:
+        # Append to figure_out_size as long as the value isn't Null according to Pandas
+        if not pd.isnull(x):
+            figure_out_size.append(x)
+    
+    return len(figure_out_size)
+
+
+def find_grades_files(course, assessment, file_list):
+    """Find grades files in a list
+
+    This search function finds files based on the following requirements:
+    - The name starts with the Course #
+    - The assessment type is in the file name
+    - The file is an Excel spreadsheet (ends with .xlsx)
+    When searching, it ignores case and spacing
+
+    Args:
+        course: The course number to search for (i.e. 'ENGI 3891')
+        assessment: The assessment type to search for (i.e. 'Final Exam')
+        file_list: The list of files to search
+
+    Returns:
+        A list of all file names that match the search criteria
+    """
+    matches = list()
+    for file in file_list:
+        bool_results = list()
+        # logging.debug("Checking file %s", file)
+        bool_results.append(file.lower().strip().startswith(course.lower().strip()))
+        # logging.debug("Search for course # resulted in %s", str(bool_results[0]))
+        bool_results.append(file.lower().strip().find(assessment.lower().strip()) != -1)
+        bool_results.append(file.endswith(".xlsx"))
+        # logging.debug("Search for .xlsx resulted in %s", str(bool_results[1]))
+
+        if all (results for results in bool_results):
+            matches.append(file)
+            logging.debug("The file %s matched the search parameters", file)
+
+    return matches
+
+
+def directory_search(course, assessment, main_dir, subdirs):
+    """Search a list of directories for a course file
+
+    This method uses find_grades_file multiple times to construct a dictionary
+    of lists to return.
+
+    Args:
+        course: The course number to search for (i.e. 'ENGI 3891')
+        assessment: The assessment type to search for (i.e. 'Final Exam')
+        main_dir: The path to the main search directory
+        subdirs: The subdirectories to search
+
+    Returns:
+        results: A defaultdict of lists that contain all matches from a directory
+
+    Example Return:
+    {
+        "ENCM": ["ENGI 1040 Circuits Grade - ENCM.xlsx"],
+        "Core": [
+            "ENGI 1040 Circuits Grade - Core - Custom column names.xlsx",
+            "ENGI 1040 Circuits Grade - Core.xlsx"
+        ],
+        "ECE": []
+    }
+    """
+    results = defaultdict()
+
+    for folder in subdirs:
+        logging.debug("Searching folder %s", folder)
+        # Run the find_grades_files method on the folder in the subdirectory
+        ls = find_grades_files(course, assessment, os.listdir(main_dir + '/' + folder))
+        if ls:
+            results[folder] = ls
+    
+    return results
