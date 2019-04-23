@@ -3,7 +3,7 @@ import textwrap
 import re
 import logging
 
-def format_annotation_text(header_info, textwrap_lim=60):
+def format_annotation_text(header_info, textwrap_lim=60, sep='<br>'):
     """Create a table-like format for the header text on a Report
 
     Args:
@@ -11,6 +11,8 @@ def format_annotation_text(header_info, textwrap_lim=60):
             to show on the Report. The only required entry in the dictionary is
             "Graduate Attribute," the others are optional
         textwrap_lim: The character limit on text wrapping. Defaults to 60
+        sep: The separator character for the output string. Defaults to '<br>'
+            as required by Plotly
 
     Returns:
         string: The 'labels' for the elements to graph, separated by HTML line
@@ -20,29 +22,31 @@ def format_annotation_text(header_info, textwrap_lim=60):
         string: The Graduate Attribute is returned in a separate string so that
             its font size can be increased on a Report
     """
+    # Copy the header information, use pass by value
+    header_info_copy = header_info.copy()
     logging.info("Cleaning up the header information and making it a table format")
-    title = header_info["Graduate Attribute"]
+    title = header_info_copy["Graduate Attribute"]
     # After saving the element, set the GA attribute to empty for newline entry
-    header_info["Graduate Attribute"] = " "
+    header_info_copy["Graduate Attribute"] = " "
 
     label_list = list()
     description_list = list()
 
-    for key in header_info.keys():
+    for key in header_info_copy.keys():
         logging.debug("Cleaning up %s", key)
         # Use textwrap to paragraphize the passed in text, with each line stored in a list
         label_list += textwrap.wrap(key + ':', width=12)
-        description_list += textwrap.wrap(header_info[key], width=textwrap_lim)
+        description_list += textwrap.wrap(header_info_copy[key], width=textwrap_lim)
 
-        # If the number of lines in each list is not equal, add empty strings until they are equal
+        # If the number of lines in each list is not equal, add empty strings until they are
         difference = len(label_list) - len(description_list)
         if len(label_list) < len(description_list):
             [label_list.append(" ") for i in range (0, abs(difference))]
         elif len(description_list) < len(label_list):
             [description_list.append(" ") for i in range (0, abs(difference))]
 
-    # Return strings separated by the <br> character and the GA
-    return ('<br>'.join(label_list), '<br>'.join(description_list), title)
+    # Return strings separated by the separator character and the title
+    return (sep.join(label_list), sep.join(description_list), title)
 
 
 def format_percents(values):
