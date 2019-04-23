@@ -16,5 +16,6 @@
     "header_attribs": "Graduate Attribute, Indicator, Level, Program, Course, Assessment",
     "header_xloc": 0.33,
     "header_yloc": 1.9,
-    "textwrap_lim": 72
+    "textwrap_lim": 72,
+    "grade_backup_dirs": "Core, Co-op, ECE"
 }
