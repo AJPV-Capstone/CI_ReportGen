@@ -291,3 +291,36 @@ class Report(object):
         # Console print to show that the program is still running
         print("Saving", savename)
         pio.write_image(fig, savename, format)
+
+    @staticmethod
+    def generate_report(indicator_data, bins, config, grades):
+        """Generate a histogram Report object
+
+        Args:
+            indicator_data: A dictionary containing any information needed on a
+                histogram header. The dictionary needs to at least contain
+                "Graduate Attribute" as one of its keys, but other than that,
+                the keys are optional
+            bins: The bin range for this assessment to use. Should be a 4-digit
+                list if the bottom bin restriction is 0. If the bins are passed as
+                5-digit, then the first one will be used as the lowest bin
+            config: A ReportConfig object
+            grades: A Pandas DataFrame containing the grades that have to be plotted.
+                The columns of the DataFrame get used as legend entries
+            
+        Returns:
+            Report: The Report object generated
+        """
+        # Initialize Report object
+        report = Report(indicator_data, bins, config)
+        # Add the header information based on the indicator data
+        report.add_header()
+        # Plot the passed in grades
+        report.plot(grades)
+        # Add bin ranges if required
+        if report.config.add_bin_ranges:
+            report.add_bin_ranges()
+        # Add title if required
+        if report.config.add_title:
+            report.add_title()
+        return report
