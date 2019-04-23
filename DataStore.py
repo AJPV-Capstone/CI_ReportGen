@@ -8,16 +8,13 @@ import logging
 class DataStore(object):
     """Data Storage object
 
-    An object that stores all of the grades and indicator data in one place.
-    Contains methods used to query information from the stored data, including
-    indicator info, grades, and so on.
+    An object that stores all of the indicator data in one place. This object was
+    built to be replaced by a database interface (hence the name), and many of the
+    methods reflect that. For example, the object has a query method.
 
     Attributes:
         indicators: A dictionary of Pandas DataFrames that store the master indicator
-            lists for each program. These are typically loaded as needed to avoid
-            unnecessary memory usage
-        last_query: Stores the result from the last dictionary query to the indicators
-            DataFrame
+            lists for each program
         indicators_loc: The location of the indicator sheets
         grades_loc: The top folder for the grade storage
         backup_file_lists: A dict of lists that stores the file names in the
@@ -61,7 +58,6 @@ class DataStore(object):
 
         logging.info("Loading indicator lookup tables from programs list")
         self.indicators = defaultdict()
-        filestring = "{} Indicators.xlsx" # Formatted string to open indicator files with
 
         # Get a list of programs to open indicator files for
         if not programs:
@@ -69,27 +65,33 @@ class DataStore(object):
             programs = globals.all_programs.copy()
         
         # Iterate across the programs list and load the indicator files
+
+        # Formatted string to open indicator files with
+        filestring = "{pth}/{prgm} Indicators.xlsx"
         for p in programs:
             logging.debug("Attempting to load indicators for %s using file %s",
-                p, self.indicators_loc + filestring.format(p)
+                p, filestring.format(pth = self.indicators_loc, prgm = p)
             )
-            self.indicators[p] = pd.read_excel(self.indicators_loc + filestring.format(p))
+            self.indicators[p] = pd.read_excel(filestring.format(pth = self.indicators_loc, prgm = p))
 
+        # Find out where to find the grades
         logging.info("Setting up location to find grades")
         if not grades_loc:
-            pth = os.path.dirname(__file__) + '/Grades/'
+            pth = os.path.dirname(__file__) + '/../Grades'
             logging.debug("No grades location passed to the constructor, using %s", pth)
             self.indicators_loc = pth
         else:
             self.grades_loc = grades_loc
 
+        # Backup file directories in dict form (directories where non-separated data gets stored)
         logging.info("Storing file lists of the Core, Co-op and ECE directories")
         self.backup_file_lists = {
-            'Core': os.listdir(self.grades_loc + 'Core/'),
-            'Co-op': os.listdir(self.grades_loc + 'Co-op/'),
-            'ECE': os.listdir(self.grades_loc + 'ECE/')
+            'Core': os.listdir(self.grades_loc + '/' + 'Core'),
+            'Co-op': os.listdir(self.grades_loc + '/' + 'Co-op'),
+            'ECE': os.listdir(self.grades_loc + '/' + 'ECE')
         }
 
+        # Open the unique course file
         logging.info("Opening the Unique Courses file")
         self.unique_courses = pd.read_excel(os.path.dirname(__file__) + '/../Unique Courses.xlsx')
 
@@ -100,8 +102,7 @@ class DataStore(object):
         """Get indicator information for the report
 
         Queries a specific program's indicator list and returns a DataFrame
-        containing all of the search results. The final query also gets internally
-        stored in self.last_query.
+        containing all of the search results.
 
         Args:
             program: The program to search for the indicator
@@ -116,17 +117,20 @@ class DataStore(object):
         logging.info("Start of query_indicators method")
         # Try to set the last query to the indicators
         try:
-            self.last_query = self.indicators[program]
+            last_query = self.indicators[program]
         except KeyError:
             logging.warning("Indicators for %s apparently not loaded. Loading now...", program)
             self.indicators[program] = pd.read_excel(self.indicators_loc + "/{} Indicators.xlsx".format(program))
-            self.last_query = self.indicators[program]
+            last_query = self.indicators[program]
         
+        logging.debug("Querying %s", str(dict_of_queries))
+
         # Query iteratively using the dict keys
         if dict_of_queries:
             for key in dict_of_queries.keys():
                 # Find the spreadsheet column that closely matches the dictionary key
-                col = next((s for s in self.last_query.columns if key.lower() in s.lower()), None)
+                col = next((s for s in last_query.columns if key.lower() in s.lower()), None)
+                logging.debug("Query for %s mapped to %s in indicator table", key, col)
                 #---------------------------------------------------------------------------------
                 # Query to take a value only if the query list entry contains part of the value.
                 # The main thing here is that to get the value out, only part of the value in the
@@ -136,7 +140,8 @@ class DataStore(object):
                 #---------------------------------------------------------------------------------
                 # Use a regular expression to get the parse to work
                 pat = re.compile('|'.join(dict_of_queries[key]))
-                query = self.last_query[col].str.contains(pat)
-                self.last_query = self.last_query[query]    # Query the DataFrame
+                query = last_query[col].str.contains(pat)
+                last_query = last_query[query]    # Query the DataFrame
+                logging.debug("Query for %s resulted in %d results", key, len(last_query.index))
 
-        return self.last_query
+        return last_query
