@@ -239,8 +239,8 @@ class ReportGenerator(object):
             logging.info("Beginning row iteration...")
             for i, row in query.iterrows():
                 
-                # Skip this row if the "Assessed" column is set to any form of "No"
-                if row['Assessed'].lower() == 'no':
+                # Skip this row if the "Assessed" column is set to any form of "No" (also check if it's there)
+                if 'Assessed' in row and row['Assessed'].lower() == 'no':
                     # print("Found a non-assessed indicator")
                     continue
 
