@@ -38,7 +38,7 @@ default = {
     "dpi": 150,
     "orientation": "landscape",
     "format": "pdf",
-    "max_plots": 5,
+    "max_plots": 6,
     "add_title": True,
     "add_percents": True,
     "add_legend": True,

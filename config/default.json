@@ -5,7 +5,7 @@
     "dpi": 150,
     "orientation": "landscape",
     "format": "pdf",
-    "max_plots": 5,
+    "max_plots": 6,
     "add_title": true,
     "graph_title": "GRADE DISTRIBUTION",
     "add_percents": true,
