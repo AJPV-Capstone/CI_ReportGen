@@ -64,10 +64,11 @@ class DataStore(object):
             logging.debug("No program list passed to the constructor - using all programs")
             programs = globals.all_programs.copy()
         
-        # Iterate across the programs list and load the indicator files
-
         # Formatted string to open indicator files with
         filestring = "{pth}/{prgm} Indicators.xlsx"
+        #------------------------------------------------------------------------------------
+        # Iterate across the programs list and load the indicator files
+        #------------------------------------------------------------------------------------
         for p in programs:
             logging.debug("Attempting to load indicators for %s using file %s",
                 p, filestring.format(pth = self.indicators_loc, prgm = p)
