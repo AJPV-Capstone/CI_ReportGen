@@ -186,14 +186,11 @@ def get_cohort_coop(year_and_semester, WT):
     On a given work term, there can be 2 possible cohorts, and these can be
     calculated. See the following example:
 
-     year and semester  |            cohort (work term numbers)
-    --------------------+---------------------------------------------------
-    Fall 2017 (201701)  |   2020(1-3) and 2018(4)
-    --------------------+---------------------------------------------------
-    Winter 2018 (201702)|   2021(1-2) and 2019(3-4)
-    --------------------+---------------------------------------------------
-    Spring 2018 (201703)|   2022(1) and 2020(2-4)
-    --------------------+---------------------------------------------------
+    |  year and semester  |            cohort (work term numbers)           |
+    |---------------------|-------------------------------------------------|
+    | Fall 2017 (201701)  |   2020(1-3) and 2018(4)                         |
+    | Winter 2018 (201702)|   2021(1-2) and 2019(3-4)                       |
+    | Spring 2018 (201703)|   2022(1) and 2020(2-4)                         |
 
     The first possible cohort is year + semester + 2. See below:
         2017 + 1 + 2 = 2020

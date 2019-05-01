@@ -50,7 +50,7 @@ class DataStore(object):
         logging.info("Start of DataStore initialization")
         logging.info("Setting up location of Indicator lookup tables")
         if not indicators_loc:
-            pth = os.path.dirname(__file__) + '/Indicators/'
+            pth = os.path.dirname(__file__) + '/../Indicators'
             logging.debug("No indicator directory passed to the constructor - using %s", pth)
             self.indicators_loc = pth
         else:
@@ -63,7 +63,7 @@ class DataStore(object):
         if not programs:
             logging.debug("No program list passed to the constructor - using all programs")
             programs = globals.all_programs.copy()
-        
+
         # Formatted string to open indicator files with
         filestring = "{pth}/{prgm} Indicators.xlsx"
         #------------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ class DataStore(object):
         if not grades_loc:
             pth = os.path.dirname(__file__) + '/../Grades'
             logging.debug("No grades location passed to the constructor, using %s", pth)
-            self.indicators_loc = pth
+            self.grades_loc = pth
         else:
             self.grades_loc = grades_loc
 
@@ -123,7 +123,7 @@ class DataStore(object):
             logging.warning("Indicators for %s apparently not loaded. Loading now...", program)
             self.indicators[program] = pd.read_excel(self.indicators_loc + "/{} Indicators.xlsx".format(program))
             last_query = self.indicators[program]
-        
+
         logging.debug("Querying %s", str(dict_of_queries))
 
         # Query iteratively using the dict keys

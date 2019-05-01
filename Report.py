@@ -159,7 +159,7 @@ class Report(object):
             logging.warning("The number of plots for this histogram exceeded the threshold in ReportConfig!")
             # Remove data plots by first occurence in the list of keys
             while len(data) > self.config.max_plots:
-                removed = data.pop(data.keys()[0])
+                removed = data.pop(list(data.keys())[0])
                 logging.warning("Removed data set for %s", removed)
 
         # Bar the data
