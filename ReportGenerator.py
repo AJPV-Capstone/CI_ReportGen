@@ -304,7 +304,7 @@ class ReportGenerator(object):
                     subdirs = [program] + [x.strip() for x in self.config.grade_backup_dirs.split(',')]
                 )
 
-                # If the lists are empty, add data entry to missing data file and continue
+                # If the lists are empty, add data entry to missing data file
                 if not any(found_grade_files[k] for k in found_grade_files.keys()):
                     missing_thing = "{a} {b} ({c}-{d})".format(
                         a=row["Course #"],
@@ -312,9 +312,13 @@ class ReportGenerator(object):
                         c=row['Indicator #'],
                         d=row['Level']
                     )
-                    logging.warning("No data found for %s. Skipping this indicator", missing_thing)
+                    logging.warning("No data found for %s", missing_thing)
                     missing_data.write("Missing data for {}\n".format(missing_thing))
-                    continue
+                    #-----------------------------------------------------------------------------
+                    # Set up the found_grade_files dictionary in a way that the program will
+                    # recognize as missing data and generate a blank histogram for
+                    #-----------------------------------------------------------------------------
+                    found_grade_files = {program: [None]}
                 else:
                     logging.debug("Found files in %s", ', '.join(found_grade_files.keys()))
 
@@ -328,18 +332,21 @@ class ReportGenerator(object):
                 #-----------------------------------------------------------------------------
                 # Iterate across the list of grade files found and separately generate a
                 # histogram for each file. Referring to the grade file keys as the location
-                # at which the grades file was found.
+                # at which the grades file was found. Generates a blank histogram in cases
+                # where no data was found.
                 #-----------------------------------------------------------------------------
                 for location in found_grade_files.keys():
                     for file in range(0, len(found_grade_files[location])):
-
-                        # Open the grades
-                        grades = pd.read_excel("{}/{}/{}".format(
-                            self.config.grades_loc,
-                            location,
-                            found_grade_files[location][file]
+                        # Provide DataFrame to generate empty histograms if no data is found
+                        if isinstance(found_grade_files[location][file], type(None)):
+                            grades = pd.DataFrame({'NO DATA FOUND': [-1]})
+                        else:   # Open the grades normally
+                            grades = pd.read_excel("{}/{}/{}".format(
+                                self.config.grades_loc,
+                                location,
+                                found_grade_files[location][file]
+                                )
                             )
-                        )
 
                         # Try changing the the DataFrame columns to cohort messages
                         try:
