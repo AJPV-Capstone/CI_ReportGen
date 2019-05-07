@@ -259,7 +259,7 @@ def separate_promo_sheet(year, grades_dir='../Grades/', filename=None):
                             break
                         elif user_input == 'n':
                             print ("Stopping program")
-                            return 0;
+                            return 0
                         else:
                             print("You have not entered a valid input!")
                 print("Creating a new file for", file)
