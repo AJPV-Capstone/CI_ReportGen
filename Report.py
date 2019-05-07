@@ -10,10 +10,9 @@ import logging
 import pandas as pd
 
 class Report(object):
-    """Report Class
-
-    Used for generating reports on indicator data. Uses plotly to generate
-    histograms. Many attributes that define properties about the plot are
+    """Inputs-based Report class using Plot.ly(https://plot.ly/python/) to generate histograms
+    
+    Many attributes that define properties about the plot are
     stored in a ReportConfig object that this one has reference to. For more
     information, see the ReportConfig docstring. For the most part, this object
     assumes that input data has already been validated.
@@ -31,6 +30,9 @@ class Report(object):
             5-digit, then the first one will be used as the lowest bin
         _annotations: A list of plotly.layout.Annotation objects that the object
             uses when the Report is built into a Figure
+    
+    See also:
+        ReportConfig
     """
 
 

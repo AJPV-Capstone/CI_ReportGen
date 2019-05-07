@@ -7,63 +7,69 @@ import logging
 class ReportConfig(object):
     """Report options/configurations
 
-        A class that stores parameters used for various automations in a Report
-        object. This class allows JSON loading so that popular templates can
-        be saved and re-used. Also opens the MUN logo and keeps it open so that
-        during Report autogeneration, it does not have to be closed and
-        re-opened many times. The JSON configurations load last, so they can be
-        used to override any attributes set in the object.
+    A class that stores parameters used for various automations in a Report
+    object. This class allows JSON loading so that popular templates can
+    be saved and re-used. Also opens the MUN logo and keeps it open so that
+    during Report autogeneration, it does not have to be closed and re-opened
+    many times. The JSON configurations load their parameters last, so they
+    can be used to override class attributes if desired.
 
-        Attributes from config file:
-            name: The name of the configuration
-            plot_grades_by: A parameter meant to indicate how to plot grades.
-                Currently, the project only does plotting by year, but the
-                intended plan was to set up the report generator such that it
-                could plot grades from multiple course files on one graph.
-            annotation_font: The font size of the annotations. All other font sizes
-                are derived from this font size. Default size is 16
-            dpi: The dots per inch of the generated Report. Default is 150
-            orientation: The plot orientation. The current choices are 'landscape'
-                and 'portrait.' The 'portrait' orientation might not work properly,
-                and the program defaults to 'landscape'
-            format: The save format for the Report. Defaults to 'pdf,' but any
-                file extension supported by Plotly's Static Image Export should
-                work.
+    The first JSON file the program loads is default.json, which it always does.
+    It then loads any config files passed as arguments during initialization.
 
-            max_plots(int): The maximum number of plots that can be on a Report's
+    **These attributes are JSON-loaded**
+
+    Attributes:
+        name(string): The name of the configuration
+        plot_grades_by(string): A parameter meant to indicate how to plot grades.
+            Currently, the project only does plotting by year, but the
+            intended plan was to set up the report generator such that it
+            could plot grades from multiple course files on one graph.
+        annotation_font(int or float): The font size of the annotations. All other font sizes
+            are derived from this font size. Default size is 16
+        dpi(int): The dots per inch of the generated Report. Default is 150
+        orientation(string): The plot orientation. The current choices are 'landscape'
+            and 'portrait.' The 'portrait' orientation might not work properly but
+            has not been tested. Defaults to 'landscape'.
+        format(string): The save format for the Report. Defaults to 'pdf,' but any
+            file extension supported by Plotly's Static Image Export should
+            work (https://plot.ly/python/static-image-export/).
+        max_plots(int): The maximum number of plots that can be on a Report's
                 histogram at once. Defaults to 5
-            add_title(bool): Add a graph title (Default True)
-            graph_title(str): The title that should be added to the graph. Can
-                be a formatted string and the generator will automatically try
-                to put cohort in it. Defaults to "GRADE DISTRIBUTION"
-            add_percents(bool): Show bar percentages (Default True)
-            add_legend(bool): Show legend (Default True)
-            add_bin_ranges(bool): Add the bin range description (Default True)
-            show_NDA(bool): Indicates whether or not a 'No Data Available' bin
-                should appear on some plots. The condition for this bin is
-                specified with NDA_threshold
-            NDA_threshold(float): If the percentage of no data entries is greater
-                than or equal to this threshold value, the 'No Data Available'
-                bin will appear for ALL plots. Defaults to 0.10, or 10%
+        add_title(bool): Add a graph title (Default True)
+        graph_title(string or formatted string): The title that should be added
+            to the graph. Can be a formatted string and the generator will
+            automatically try to put cohort in it. Defaults to "GRADE DISTRIBUTION"
+        add_percents(bool): Show bar percentages (Default True)
+        add_legend(bool): Show legend (Default True)
+        add_bin_ranges(bool): Add the bin range description (Default True)
+        show_NDA(bool): Indicates whether or not a 'No Data Available' bin
+            should appear on some plots. The condition for this bin is
+            specified with NDA_threshold
+        NDA_threshold(float): If the percentage of no data entries is greater
+            than or equal to this threshold value, the 'No Data Available'
+            bin will appear for ALL plots. Defaults to 0.10, or 10%
+        header_attribs(comma-separated string): A comma-separated string of the
+            categories that should be added to a Report header (e.g. 'Graduate
+            Attribute, Indicator, Assessment')
+        header_xloc(float): The x location of the header
+        header_yloc(float): The y location of the header
+        textwrap_lim(int): The limit on textwrap for the header. Defaults to 72 characters
 
-            header_attribs: A comma-separated string of the things that should
-                be added to a graph header
-            header_xloc: The x location of the header
-            header_yloc: The y location of the header
-            textwrap_lim: The limit on textwrap for the header. Defaults to 72
-                characters
+    **These attributes are NOT JSON-loaded**
 
-        Other Attributes (not from config files):
-            MUN_logo: The MUN logo in base64
-            font_sizes: A dictionary of font sizes used in the Report
-            paper_dimensions: A dictionary of tuples indicating paper dimensions
-            indicators_loc: Where the program can find the indicator master sheets
-            grades_loc: Where the program can find grades files
-            histograms_loc: Where the program should save histograms
+    Attributes:
+        MUN_logo: The MUN logo in base64
+        font_sizes: A dictionary of font sizes used in the Report
+        paper_dimensions: A dictionary of tuples indicating paper dimensions
+        indicators_loc: Where the program can find the indicator master sheets
+        grades_loc: Where the program can find grades files
+        histograms_loc: Where the program should save histograms
 
-        Todo:
-            - Verify the accuracy of this docstring
-            - Implement a config saving feature using this object
+    TODO:
+        * Verify the accuracy of this docstring
+        * Implement a config saving feature
+        * Clean up the useless parameters, both in config files and the code itself
     """
 
 
