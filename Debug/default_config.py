@@ -33,7 +33,6 @@ import os
 
 default = {
     "name": "default",
-    "plot_grades_by": "year",
     "annotation_font": 16,
     "dpi": 150,
     "orientation": "landscape",

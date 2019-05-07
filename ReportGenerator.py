@@ -11,94 +11,103 @@ import re
 import pandas as pd
 from collections import defaultdict
 
+
 class ReportGenerator(object):
-    """Report Generator Class
+    """Assists with generating histogram reports
 
     Bundles all of the Report object generation things in one place and adds
     convenience methods for generation
 
     Attributes:
-        config: A ReportConfig object
-        programs: A list of programs to process
-        whitelist: A dictionary including lists of the only things that should
+        config(ReportConfig): A ReportConfig object that the generator passes to each
+            generated Report
+        programs(list(string)): A list of programs (e.g. ENCM) to process.
+        whitelist(dictionary): A dictionary including lists of the only things that should
             be processed. Options can include, but are not limited to, lists of:
-            - courses
-            - indicators
-            - assessments
+                * Courses
+                * Indicators
+                * Assessments
             As long as the whitelist key matches closely to the column name in
             the indicator lookup table, it should be fine
-        ds: A DataStore object
+        ds(DataStore): A DataStore object
 
-        Todo:
-            - Implement a blacklisting feature
+        TODO:
+            * Implement a blacklisting feature
     """
 
 
-    def __init__(self, config, year=None, semester=None, programs=None, whitelist=None, ds=None,
-            indicators_loc=None, grades_loc=None, histograms_loc=None):
+    def __init__(self, config, programs=None, cohorts=None, whitelist=None, ds=None,
+            indicators_loc=None, grades_loc=None, histograms_loc=None,):
         """Object Initialization
 
-        A whole bunch of the parameters for this init don't actually do anything
-        right now. That should probably just get cleaned up.
-
         Args:
-            config: A ReportConfig object
-            indicators_loc: The location of the indicator sheets. Defaults to
-                searching an "Indicators" folder in the directory above the
-                project (see ReportConfig documentation for more info)
-            grades_loc: The location of the grades sheets. Defaults to searching
-                a "Grades" folder in the directory above the project (see
-                ReportConfig documentation for more info)
-            histograms_loc: The location to store histograms. Defaults to using
-                a "Histograms" folder in the directory above the project (see
-                ReportConfig documentation for more info)
-            year: The academic year that data is being parsed for, or in some cases
-                depending on config, the cap year on grade generation. Defaults
-                to None
-            semester: An integer from 1 to 3 indicating the semester. Defaults
-                to None
-            programs: A list of programs to generate indicators for. Defaults to
-                using all programs. The passed list should be a list of strings,
-                but if only one string is passed in, it will get put into a
-                size-one list.
-            whitelist: A dictionary of lists, keyed by the only stuff to parse (i.e.
-                'course', 'indicator', etc.) and filled with the specific values
-                to uniquely parse. Defaults to no whitelist. The lists in the
-                dictionaries can be partial (i.e. if you pass 'KB' as part of the
+            config(ReportConfig): A ReportConfig object
+            programs(string or list(string)): A list of programs to generate indicators for.
+                Defaults to using all programs. If only one string is passed in, it will
+                get put into a size-one list.
+            cohorts(int or list(int)): A list of cohorts to pull data from. Defaults to
+                using all cohorts. If only one cohort is passed in, it will get put into
+                a size-one list.
+            whitelist(dictionary): A dictionary of lists, keyed by the only stuff
+                to parse (e.g. 'course', 'indicator', etc.) and filled with the
+                specific values to uniquely parse. Defaults to no whitelist. The lists
+                in the dictionaries can be partial (i.e. if you pass 'KB' as part of the
                 'indicator' whitelist, it will pull all 'KB' indicators). If the
                 lists contain only one string, that string gets put into a
                 size-one list.
-            ds: A DataStore object. Defaults to generating one based on the
+            ds(DataStore): A DataStore object. Defaults to generating one based on the
                 whitelist entries for 'programs'
+            indicators_loc(string): The location of the indicator sheets. Defaults to
+                searching an "Indicators" folder in the directory above the project
+                (see ReportConfig for more info)
+            grades_loc(string): The location of the grades sheets. Defaults to searching
+                a "Grades" folder in the directory above the project (see
+                ReportConfig for more info)
+            histograms_loc(string): The location to store histograms. Defaults to using
+                a "Histograms" folder in the directory above the project (see
+                ReportConfig for more info)
         """
         logging.info("Start of AutoGenerator initialization")
         self.config = config
 
-        logging.info("Initializing whitelist")
+        # logging.info("Initializing whitelist")
         self.whitelist = whitelist
         # Ensure that all whitelist entries are lists (if it exists, that is)
-        if whitelist:
+        if self.whitelist:
+            logging.debug("Checking whitelist for list validity")
             for entry in self.whitelist.keys():
-                if type(self.whitelist[entry]) is not type(list()):
-                    logging.debug("Whitelist entry %s is not a list. Converting to a one-size list", entry)
-                    # Change to one-size list
-                    self.whitelist[entry] = [self.whitelist[entry]]
+                self.whitelist[entry] = _check_list(self.whitelist[entry])
 
-        logging.info("Initializing program list")
+                # if type(self.whitelist[entry]) is not type(list()):
+                #     logging.debug("Whitelist entry %s is not a list. Converting to a one-size list", entry)
+                #     # Change to one-size list
+                #     self.whitelist[entry] = [self.whitelist[entry]]
+
+        # logging.info("Initializing cohorts list")
+        self.cohorts = cohorts
+        # Ensure that all cohorts entries are lists (if it exists, that is)
+        if self.cohorts:
+            logging.debug("Checking cohorts variable for list validity")
+            self.cohorts = _check_list(self.cohorts)
+
+        # logging.info("Initializing program list")
         self.programs = programs
+        # Ensure list validity of programs
+        if self.programs:
+            logging.debug("Checking programs for list validity")
+            self.programs = _check_list(self.programs)
 
         # Use all programs if none were provided
         if not self.programs:
             logging.debug("Programs not passed as paramater. Using list of all programs")
             self.programs = globals.all_programs
 
-        # Same check as whitelist - ensure that self.programs is a list
-        if type(self.programs) is not type(list()):
-            logging.debug("Programs was not passed in list format. Converting to a one-size list")
-            self.programs = [self.programs]
+        # # Same check as whitelist - ensure that self.programs is a list
+        # if type(self.programs) is not type(list()):
+        #     logging.debug("Programs was not passed in list format. Converting to a one-size list")
+        #     self.programs = [self.programs]
 
-        # If any of the file location parameters were passed in, overwrite what
-        # the ReportConfig object has
+        # If any of the file location parameters were passed in, overwrite what ReportConfig has
         if indicators_loc:
             self.config.indicators_loc = indicators_loc
         if grades_loc:
@@ -110,13 +119,13 @@ class ReportGenerator(object):
         logging.debug("Grades location is %s", self.config.grades_loc)
         logging.debug("Histograms location is %s", self.config.histograms_loc)
 
-        # Check to see if a DataStore was passed to the function
+        # Check to see if a DataStore was passed to init, create one if not
         if not ds:
-            logging.debug("No DataStore object was passed to the function; creating one now")
+            logging.debug("No DataStore object was passed to init; creating one now")
             self.ds=DataStore(programs=self.programs, indicators_loc=self.config.indicators_loc,
                     grades_loc=self.config.grades_loc)
 
-        # Make sure that the histograms folder exists as the program writes to it
+        # Make sure that the histograms folder exists
         logging.info("Setting up output directories (Missing Data & Histograms)")
         os.makedirs(os.path.dirname(__file__) + '/../Missing Data', exist_ok=True)
         os.makedirs(self.config.histograms_loc, exist_ok=True)
@@ -131,11 +140,11 @@ class ReportGenerator(object):
         properly for a Report to use it. This function does that based on things
         in the ReportConfig.
 
-        - ReportConfig.header_attribs determines what data gets pulled from the
-          spreadsheet. For a single entry in header_attribs, multiple values
-          could get pulled and concatenated from the spreadsheet row. For example,
-          writing just 'Course' in the header_attribs would join the columns
-          'Course #' and 'Course Description' using a ' - ' character
+        ReportConfig.header_attribs determines what data gets pulled from the
+        spreadsheet. For a single entry in header_attribs, multiple values
+        could get pulled and concatenated from the spreadsheet row. For example,
+        writing just 'Course' in the header_attribs would join the columns
+        'Course #' and 'Course Description' using a ' - ' character
 
         Args:
             row: The row of a Pandas DataFrame (so a Pandas Series) to clean up
@@ -144,9 +153,7 @@ class ReportGenerator(object):
             dict: A dictionary containing the indicator information, keyed using instructions
             list(float): The bin ranges that have been converted from a comma-separated string
                 to a list of floats. 0 gets appended to the front for NumPy histogram
-
-        Todo:
-            - Document the exceptions
+            None, None: Returns 2 None values if non-number bins are found in the row
         """
         logging.info("Parsing a row from a Pandas DataFrame")
         # Handle the bins first since those are easy
@@ -178,34 +185,31 @@ class ReportGenerator(object):
         return indicator_dict, bins
 
 
-    def autogenerate(self):
+    def start_autogenerate(self):
         """Begin autogeneration of reports
 
         The general procedure goes as follows:
-        
-        Iterate across the stored indicator lookup tables:
-            Query the indicator table using the whitelist
-            Iterate through the query:
+        * Iterate across the stored indicator lookup tables:
 
+          * Query the indicator table using the whitelist
+          * Iterate through the query:
 
+            * Get indicator data from the row
+            * Search for grades for the assessment tool
+            * Iterate through each file found and save a histogram
 
-        Todo:
-            - Implement other ways to set up the grades
-            - Make get_cohort call less bad
+        TODO:
+            * Decouple the method
+            * Change the file naming conventions to be shorter
         """
         #------------------------------------------------------------------------------
         # Initial Autogeneration Setup
         #------------------------------------------------------------------------------
 
         logging.info("Beginning report autogeneration")
-        # If the autogeneration is not plotting grades by year, do different things
-        # with the way that autogeneration iterates?
-        logging.debug("Autogenerator set to plot grades by %s from ReportConfig", self.config.plot_grades_by)
-        if self.config.plot_grades_by != 'year':
-            raise NotImplementedError("Cannot plot grades by any type other than year")
-        else:
-            iterprograms = self.programs
-        logging.debug("Autogenerator set up to use programs: %s", ', '.join(iterprograms))
+        # Save list of programs
+        iterprograms = self.programs
+        logging.debug("Autogenerator set up to use programs %s", ', '.join(iterprograms))
 
         # Iterate across the list of programs
         for program in iterprograms:
@@ -425,3 +429,32 @@ class ReportGenerator(object):
                             report.save(save_as)
 
         logging.info("Autogeneration done!")
+
+
+    @staticmethod
+    def autogenerate(config, programs=None, cohorts=None, whitelist=None, ds=None,
+            indicators_loc=None, grades_loc=None, histograms_loc=None,):
+        """Shortcut to start histogram generation
+
+        TODO:
+            * Create the method
+        """
+        pass
+
+
+def _check_list(var):
+    """Check a variable to see if it's a list and convert to a list if it's not
+
+    Checks a parameter to see if it's a list. If it's not a list, it gets converted
+    to a one-size list
+
+    Args:
+        var: The parameter to type check
+
+    Returns:
+        var if var was a list, [var] if var was not a list
+    """
+    if not isinstance(var, type(list)):
+        logging.debug("Variable %s was not a list. Converting to one-size list now...", str(var))
+        var = [var]
+    return var
