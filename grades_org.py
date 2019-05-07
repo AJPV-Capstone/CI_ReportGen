@@ -59,21 +59,19 @@ def cols_to_cohorts(grades, course_name, course_term_offered=None):
             cohort (i.e. 201701 or 2017 as academic year notation, or 2022 as
             cohort)
         course_name: The name of the course that the grades DataFrame is for.
-            Variable gets passedto get_cohort from textformatting. For more
-            info, see that documentation
+            Variable gets passed to get_cohort from textformatting.
         course_term_offered: The term that a course is offered. Variable gets
-            passed to get_cohort function from textformatting. For more info,
-            see that documentation
+            passed to get_cohort function from textformatting.
 
     Returns:
         list(str): A list of strings, all as cohort messages
     """
-    logging.info("Re-organizing the grade columns by changing their year to a cohort message")
+    logging.info("Changing DataFrame columns to cohort messages")
     renamed_columns = list()
     for col in grades.columns:
         # Get the real size of the grade column (size without Null values)
         cohort_size = true_size(grades[col])
-        renamed_columns.append("{}COHORT-{} STUDENTS".format(
+        renamed_columns.append("CO{}: {} STUDENTS".format(
             tf.get_cohort(col, course=course_name, term_taken = course_term_offered),
             cohort_size
         ))

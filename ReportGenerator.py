@@ -155,7 +155,7 @@ class ReportGenerator(object):
                 to a list of floats. 0 gets appended to the front for NumPy histogram
             None, None: Returns 2 None values if non-number bins are found in the row
         """
-        logging.info("Parsing a row from a Pandas DataFrame")
+        # logging.info("Parsing a row from a Pandas DataFrame")
         # Handle the bins first since those are easy
         try:
             bins = [float(x) for x in row['Bins'].split(',')]
@@ -165,23 +165,23 @@ class ReportGenerator(object):
         logging.debug("Bins parsed as:\t%s", ', '.join(str(x) for x in bins))
 
         # Convert the comma-separated string into dictionary keys
-        logging.info("Creating a dictionary of indicator information")
+        # logging.info("Creating a dictionary of indicator information")
         indicator_dict = {i:"" for i in [x.strip() for x in self.config.header_attribs.split(',')]}
 
-        logging.info("Filling the dictionary with information from the row")
+        # logging.info("Filling the dictionary with information from the row")
         for key in indicator_dict.keys():
             # Look for all occurrences where the key is found in the row's columns
             # and store that information in a list
             occurrences = [str(row[i]) for i in row.index if key in i]
             # Glue all collected data together with ' - ' characters
-            logging.debug("Indicator entry %s being filled with info from lookup table columns %s",
-                key,
-                ', '.join(occurrences)
-            )
+            # logging.debug("Indicator entry %s being filled with info from lookup table columns %s",
+            #     key,
+            #     ', '.join(occurrences)
+            # )
             indicator_dict[key] = ' - '.join(occurrences)
-            logging.debug("Entry [%s]: %s", key, indicator_dict[key])
+            # logging.debug("Entry [%s]: %s", key, indicator_dict[key])
 
-        logging.info("Returning indicator dictionary and bins from this row")
+        # logging.info("Returning indicator dictionary and bins from this row")
         return indicator_dict, bins
 
 
@@ -200,22 +200,24 @@ class ReportGenerator(object):
 
         TODO:
             * Decouple the method
-            * Change the file naming conventions to be shorter
+            * Change the histogram file naming conventions to be shorter
+            * Allow multiple assessment files to exist and get generated histograms
+              (e.g. allow 'ENGI 1040 Circuits Grade' and 'ENGI 1040 Circuits Grade
+              by Term' to both exist)
         """
         #------------------------------------------------------------------------------
         # Initial Autogeneration Setup
         #------------------------------------------------------------------------------
 
         logging.info("Beginning report autogeneration")
-        # Save list of programs
-        iterprograms = self.programs
-        logging.debug("Autogenerator set up to use programs %s", ', '.join(iterprograms))
+ 
+        logging.debug("Autogenerator set up to use programs %s", ', '.join(self.programs))
 
         # Iterate across the list of programs
-        for program in iterprograms:
+        for program in self.programs:
             logging.info("Generating reports for program %s", program)
 
-            logging.info("Getting a query list from the program's indicator lookup table")
+            # logging.info("Getting a query list from the program's indicator lookup table")
             # Query the indicators DataFrame
             query = self.ds.query_indicators(program=program, dict_of_queries=self.whitelist)
 
@@ -236,11 +238,11 @@ class ReportGenerator(object):
             logging.debug("Searching for grades file in folders %s", ', '.join(search_list.keys()))
 
             # Set up a file to store missing data in
-            logging.info("Starting a file to save missing data")
+            # logging.info("Starting a file to save missing data")
             missing_data = open("../Missing Data/{} missing data.txt".format(program), "w+")
 
             # Iterate across each indicator (each row of the query)
-            logging.info("Beginning row iteration...")
+            # logging.info("Beginning row iteration...")
             for i, row in query.iterrows():
                 
                 # Skip this row if the "Assessed" column is set to any form of "No" (also check if it's there)
@@ -265,12 +267,11 @@ class ReportGenerator(object):
                     ))
 
                 #------------------------------------------------------------------------------
-                # Obtain the necessary indicator data and bins from the row. The header
-                # attribs in ReportConfig determine what gets pulled and what doesn't.
-                # These header attribs are also JSON-loadable.
+                # Obtain the necessary indicator data and bins from the row. header_attribs in
+                # ReportConfig determine what gets pulled and what doesn't. These are also 
+                # JSON-loadable. Program gets added to indicator data later if required.
                 #------------------------------------------------------------------------------
                 indicator_data, bins = self._parse_row(row)
-                indicator_data['Program'] = program
                 # If no bins were parsed, a histogram cannot be generated. Skip this indicator/row
                 if not bins:
                     logging.warning("ERROR: No useable bins for {} {} {} {}, skipping row".format(
@@ -292,11 +293,11 @@ class ReportGenerator(object):
                 # {
                 #     "ENCM": [],
                 #     "Core": ["ENGI 1040 Circuits Grade - Core - Custom column names.xlsx"],
-                #     "ECE": ["ENGI 1040 Circuits Grade - Core - Custom column names.xlsx"]
+                #     "ECE": ["ENGI 1040 Circuits Grade - ECE - Custom column names.xlsx"]
                 # }
                 # These are stored in lists because the original intention was to allow
                 # multiple assessment files for the same indicator. However, this has
-                # (probably) not been implemented due to time constraints.
+                # (probably) not been implemented yet.
                 #-----------------------------------------------------------------------------
                 logging.debug("Beginning search for grade files. Priority: %s", ', '.join(search_list.keys()))
 
@@ -351,27 +352,12 @@ class ReportGenerator(object):
                                 found_grade_files[location][file]
                                 )
                             )
-
-                        # Try changing the the DataFrame columns to cohort messages
-                        try:
-                            grades.columns = grades_org.cols_to_cohorts(
-                                grades=grades,
-                                course_name = row['Course #'],
-                                course_term_offered = term_offered
+                            # Ready the DataFrame for histogramming
+                            grades = self._ready_DataFrame(
+                                grades,
+                                course=row['Course #'],
+                                term_offered=term_offered
                             )
-                        # If the columns names were not integer-convertible, append size and move on
-                        except Exception:
-                            logging.debug("Grade columns for %s %s were not integers. " \
-                                + "Appending column sizes to original column names",
-                                row["Course #"],
-                                row["Method of Assessment"]
-                            )
-                            # Use a list comprehension to append the column's true size to the message
-                            grades.columns = ["{c}({s})".format(
-                                c = entry,
-                                s = grades_org.true_size(grades[entry])
-                                ) for entry in grades.columns
-                            ]
 
                         #-----------------------------------------------------------------------------
                         # If the program that is being iterated across does not match the folder that
@@ -431,10 +417,83 @@ class ReportGenerator(object):
         logging.info("Autogeneration done!")
 
 
+    def _ready_DataFrame(self, grades, course, term_offered):
+        """Pretty up a DataFrame for histogramming
+
+        This method:
+            * Turns DataFrame columns into cohort messages to act as legend entries
+            * Filters cohorts if required
+            * Indicates if a cohort has no data available
+        
+        The columns should look something like below normally:
+
+        +--------+--------+--------+
+        | 201603 | 201703 | 201803 |
+        +========+========+========+
+
+        The method will turn these into cohort messages and use cohort filterings. If
+        a requested cohort does not appear in the grades files, a No Data column will
+        get added for that cohort.
+
+        Args:
+            grades(DataFrame): The grades that were just loaded
+            course(string): The course number
+            term_offered(int): The term that the course is offered
+        
+        Returns:
+            DataFrame: The prettied-up DataFrame
+        """
+        # Try changing the the DataFrame columns to cohort messages.
+        try:
+            grades.columns = grades_org.cols_to_cohorts(
+                grades=grades,
+                course_name = course,
+                course_term_offered = term_offered
+            )
+        # If the columns names were not integer-convertible, append size and move on
+        except Exception:
+            logging.debug("Grade columns for this assessment of %s were not integers. " \
+                + "Appending column sizes to original column names",
+                course
+            )
+            # Uses a list comprehension to append the column's true size to the message
+            grades.columns = ["{crs}({sz})".format(
+                crs = entry,
+                sz = grades_org.true_size(grades[entry])
+                ) for entry in grades.columns
+            ]
+    
+        # If a cohort filter is in place, take the columns that have the correct cohort(s)
+        if self.cohorts is not None:
+            logging.debug("Detected a cohort filter for cohorts %s", ', '.join([str(c) for c in self.cohorts]))
+            # Start a list to append relevant DataFrame columns to
+            new_grades_cols = []
+            # Iterate across each cohort requested
+            for c in self.cohorts:
+                # Iterate across the grades DataFrame columns
+                occurrences = 0
+                for col in grades.columns:
+                    if str(c) in col:
+                        new_grades_cols.append(grades[col])
+                        occurrences += 1
+                        logging.debug("Matched cohort %s with column %s", str(c), col)
+                # If no matching columns are found, append an NDA column
+                if occurrences is 0:
+                    logging.warning("No grades columns were matched to cohort %s", str(c))
+                    new_grades_cols.append(pd.Series([-1], name="Co{}: NDA".format(str(c))))
+            # Create a new DataFrame by concetenating all columns
+            grades = pd.concat(new_grades_cols, axis=1, keys = [s.name for s in new_grades_cols])
+        
+        return grades
+
+
+
     @staticmethod
     def autogenerate(config, programs=None, cohorts=None, whitelist=None, ds=None,
             indicators_loc=None, grades_loc=None, histograms_loc=None,):
         """Shortcut to start histogram generation
+
+        Initializes a ReportGenerator object and immediately starts report generation.
 
         TODO:
             * Create the method
@@ -454,7 +513,7 @@ def _check_list(var):
     Returns:
         var if var was a list, [var] if var was not a list
     """
-    if not isinstance(var, type(list)):
+    if not isinstance(var, list):
         logging.debug("Variable %s was not a list. Converting to one-size list now...", str(var))
         var = [var]
     return var

@@ -280,7 +280,7 @@ def separate_promo_sheet(year, grades_dir='../Grades/', filename=None):
     print("PROCEDURE COMPLETE")
 
 
-def histogram_by_cohort(programs=None, whitelist=None):
+def histogram_by_cohort(programs=None, whitelist=None, cohorts=None):
     """Generate histograms by cohort
 
     For more information, see ReportGenerator
@@ -290,11 +290,13 @@ def histogram_by_cohort(programs=None, whitelist=None):
             passed to a ReportGenerator object
         whitelist(dict): The same form of whitelist that gets passed to a
             ReportGenerator object
+        cohorts(int or list(int)): A list of cohorts to generate histograms for.
+            The same list of cohorts that gets passed to a ReportGenerator object
     """
     # Set up ReportConfig with by_cohort configuration
     config = ReportConfig(config_file="by_cohort.json")
     # Set up ReportGenerator
-    gen = ReportGenerator(config=config, whitelist=whitelist, programs=programs)
+    gen = ReportGenerator(config=config, whitelist=whitelist, programs=programs, cohorts=cohorts)
     # Run autogeneration
     gen.start_autogenerate()
 
