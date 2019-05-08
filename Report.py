@@ -32,7 +32,7 @@ class Report(object):
             uses when the Report is built into a Figure
     
     See also:
-        ReportConfig
+        :class:`.ReportConfig`
     """
 
 

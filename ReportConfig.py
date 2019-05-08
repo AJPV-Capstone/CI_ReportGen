@@ -21,25 +21,23 @@ class ReportConfig(object):
 
     Attributes:
         name(string): The name of the configuration
-        plot_grades_by(string): A parameter meant to indicate how to plot grades.
-            Currently, the project only does plotting by year, but the
-            intended plan was to set up the report generator such that it
-            could plot grades from multiple course files on one graph.
         annotation_font(int or float): The font size of the annotations. All other font sizes
             are derived from this font size. Default size is 16
         dpi(int): The dots per inch of the generated Report. Default is 150
         orientation(string): The plot orientation. The current choices are 'landscape'
             and 'portrait.' The 'portrait' orientation might not work properly but
             has not been tested. Defaults to 'landscape'.
-        format(string): The save format for the Report. Defaults to 'pdf,' but any
+        format(string): The save format for the Report. Defaults to 'pdf' but any
             file extension supported by Plotly's Static Image Export should
             work (https://plot.ly/python/static-image-export/).
         max_plots(int): The maximum number of plots that can be on a Report's
-                histogram at once. Defaults to 5
+                histogram at once. Defaults to 6
         add_title(bool): Add a graph title (Default True)
         graph_title(string or formatted string): The title that should be added
             to the graph. Can be a formatted string and the generator will
-            automatically try to put cohort in it. Defaults to "GRADE DISTRIBUTION"
+            automatically try to put cohort in it (i.e. "Grade Distribution
+            for Co{}" could become "Grade Distribution for Co2020"). Defaults
+            to "GRADE DISTRIBUTION"
         add_percents(bool): Show bar percentages (Default True)
         add_legend(bool): Show legend (Default True)
         add_bin_ranges(bool): Add the bin range description (Default True)
@@ -67,9 +65,7 @@ class ReportConfig(object):
         histograms_loc: Where the program should save histograms
 
     TODO:
-        * Verify the accuracy of this docstring
-        * Implement a config saving feature
-        * Clean up the useless parameters, both in config files and the code itself
+        * Implement a config saving feature using the class?
     """
 
 

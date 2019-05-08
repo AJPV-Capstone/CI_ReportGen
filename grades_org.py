@@ -1,9 +1,9 @@
 """Grades organization functions
 
-This file, along with DataStore.py, are designed to be eventyally replaced by a
+This file, along with DataStore.py, are designed to be eventually replaced by a
 proper database interface. Some of the functions may be able to carry over.
-
 """
+
 import pandas as pd
 import numpy as np
 import os
@@ -30,8 +30,7 @@ def open_grades(row, program, course_col_name = None, assessment_col_name = None
         pd.DataFrame: a DataFrame containing the grades
 
     Exceptions:
-        FileNotFoundError: Raises an error when the grades file cannot be opened
-            (comes from Pandas)
+        FileNotFoundError: Raises an error when the grades file cannot be opened (comes from Pandas)
     """
     if file:
         logging.debug("Attempting to open passed-in file %s", file)
@@ -145,6 +144,17 @@ def directory_search(course, assessment, main_dir, subdirs):
     This method uses find_grades_file multiple times to construct a dictionary
     of lists to return.
 
+    Example Return::
+
+        {
+            "ENCM": ["ENGI 1040 Circuits Grade - ENCM.xlsx"],
+            "Core": [
+                "ENGI 1040 Circuits Grade - Core - Custom column names.xlsx",
+                "ENGI 1040 Circuits Grade - Core.xlsx"
+            ],
+            "ECE": []
+        }
+
     Args:
         course: The course number to search for (i.e. 'ENGI 3891')
         assessment: The assessment type to search for (i.e. 'Final Exam')
@@ -153,16 +163,6 @@ def directory_search(course, assessment, main_dir, subdirs):
 
     Returns:
         results: A defaultdict of lists that contain all matches from a directory
-
-    Example Return:
-    {
-        "ENCM": ["ENGI 1040 Circuits Grade - ENCM.xlsx"],
-        "Core": [
-            "ENGI 1040 Circuits Grade - Core - Custom column names.xlsx",
-            "ENGI 1040 Circuits Grade - Core.xlsx"
-        ],
-        "ECE": []
-    }
     """
     results = defaultdict()
 

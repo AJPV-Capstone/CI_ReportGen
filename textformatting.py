@@ -186,24 +186,31 @@ def get_cohort_coop(year_and_semester, WT):
     On a given work term, there can be 2 possible cohorts, and these can be
     calculated. See the following example:
 
+    +---------------------+-------------------------------------------------+
     |  year and semester  |            cohort (work term numbers)           |
-    |---------------------|-------------------------------------------------|
+    +=====================+=================================================+
     | Fall 2017 (201701)  |   2020(1-3) and 2018(4)                         |
+    +---------------------+-------------------------------------------------+
     | Winter 2018 (201702)|   2021(1-2) and 2019(3-4)                       |
+    +---------------------+-------------------------------------------------+
     | Spring 2018 (201703)|   2022(1) and 2020(2-4)                         |
+    +---------------------+-------------------------------------------------+
 
     The first possible cohort is year + semester + 2. See below:
+
         2017 + 1 + 2 = 2020
         2017 + 2 + 2 = 2021
         2017 + 3 + 2 = 2022
+
     The second possible cohort in a semester is just year + semester, or the
     first possible cohort - 2.
 
     There is a relation between semester and work term number associated with
     a cohort. The semester indicates how many work terms belong to a cohort.
-        - If the semester number is 1, work terms 1-3 map to the first cohort
-        - If the semester number is 2, work terms 1-2 map to the first cohort
-        - If the semester number is 3, work term 1 maps to the first cohort
+
+        * If the semester number is 1, work terms 1-3 map to the first cohort
+        * If the semester number is 2, work terms 1-2 map to the first cohort
+        * If the semester number is 3, work term 1 maps to the first cohort
 
     Args:
         year_and_semester: Academic year format for when the work term was
@@ -214,8 +221,7 @@ def get_cohort_coop(year_and_semester, WT):
         The cohort of the student
 
     Exceptions:
-        ValueError: Raised when the function does not receive a  WT value from
-            1 to 4
+        ValueError: Raised when the function does not receive a  WT value from 1 to 4
     """
 
     # Split the year and semester into 2 separate values

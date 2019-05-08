@@ -24,9 +24,11 @@ class ReportGenerator(object):
         programs(list(string)): A list of programs (e.g. ENCM) to process.
         whitelist(dictionary): A dictionary including lists of the only things that should
             be processed. Options can include, but are not limited to, lists of:
+
                 * Courses
                 * Indicators
                 * Assessments
+                
             As long as the whitelist key matches closely to the column name in
             the indicator lookup table, it should be fine
         ds(DataStore): A DataStore object

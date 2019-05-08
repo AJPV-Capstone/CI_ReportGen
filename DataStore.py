@@ -13,23 +13,28 @@ class DataStore(object):
     methods reflect that. For example, the object has a query method.
 
     Attributes:
-        indicators: A dictionary of Pandas DataFrames that store the master indicator
-            lists for each program
-        indicators_loc: The location of the indicator sheets
-        grades_loc: The top folder for the grade storage
-        backup_file_lists: A dict of lists that stores the file names in the
-            "Core" and "Co-op" grades subdirectories These lists are typically
-            used as backup when the program cannot properly identify the right
-            file in the normal directory.
-        unique_courses: A Pandas DataFrame that contains information on courses
-            that do not follow the standard term offered rule. Usually, the first
-            integer in a course tag (i.e. ENGI 3424) indicates the term that course
-            is offered. However, some courses like CHEM 1051 are taken in term 3.
-            Any courses that do not have grades stored by academic year and term
-            offered should also be in this table (i.e. MATH 2000 was pulled from
-            Banner, and the grades are stored by cohort). Loaded from an Excel
-            file that the object looks for one directory above this one called
-            "Unique Courses.xlsx"
+        indicators(dict(pd.DataFrame)): A dictionary of Pandas DataFrames that store
+            the indicator information for each loaded program. The dictionary gets
+            keyed by program
+        indicators_loc(string): The path to the location of the indicator sheets
+        grades_loc(string): The path to the top folder for the grade storage
+        backup_file_lists(dict(list)): A dict of lists that store the file names
+            in the backup grades subdirectories determined in ReportConfig. These
+            lists allow histogram generation for programs in the cases of no
+            program-specific data and also allow generation of histograms for
+            Core and Co-op.
+        unique_courses(pd.DataFrame): A Pandas DataFrame that contains information
+            on courses that do not follow the standard term offered rule or that are
+            not stored in the usual format. Usually, the first integer in a course
+            tag (e.g. ENGI 3424) indicates the term that course is offered. However,
+            some courses like CHEM 1051 are taken in term 3. Any courses that do not
+            have grades stored by academic year and term offered should also be in
+            this table (e.g. MATH 2000 was pulled from Banner, and the grades are
+            stored by cohort). The data gets loaded from an Excel file that the object
+            looks for one directory above this one called "Unique Courses.xlsx"
+        
+    See Also:
+        * :class:`.ReportConfig`
     """
 
 
@@ -39,11 +44,11 @@ class DataStore(object):
         Initializes the indicator DataFrame with data from the programs list
 
         Args:
-            programs: A list of strings containing the programs to load indicators
-                for. Defaults to loading indicators for every program
-            indicators_loc: The file location for the Indicator lists. Defaults to
+            programs(list(string)): A list of strings containing the programs to
+                load indicators for. Defaults to loading indicators for every program
+            indicators_loc(string): The file location for the Indicator lists. Defaults to
                 finding them in the project directory using OS.path
-            grades_loc: The location of the grades sheets. Defaults to finding
+            grades_loc(string): The location of the grades sheets. Defaults to finding
                 them in the project directory using OS.path
 
         """
@@ -99,26 +104,30 @@ class DataStore(object):
         logging.info("DataStore object initialization complete!")
 
 
-    def query_indicators(self, program, dict_of_queries):
-        """Get indicator information for the report
+    def query_indicators(self, program, dict_of_queries=None):
+        """Query indicators sheet
 
         Queries a specific program's indicator list and returns a DataFrame
-        containing all of the search results.
+        containing all of the search results. The query behaves iteratively
+        (i.e. it will query one option, then the next option, then the next,
+        etc.).
 
         Args:
-            program: The program to search for the indicator
-            dict_of_queries: A dictionary of things to query. The dictionary keys
-                should closely resemble the column names in the indicator sheets.
-                You should be able to pass lists or single values to query.
-                Defaults to not querying
+            program(string): The program to search for the indicator
+            dict_of_queries(dict(list)): A dictionary of lists of things to
+            query. The program will try to match up each dictionary key with
+            the first column it finds that contains part of the key in the
+            indicators DataFrame. If None, the method will not query and will
+            just return the corresponding program's indicator DataFrame
 
         Returns:
             DataFrame: The DataFrame query
         """
         logging.info("Start of query_indicators method")
-        # Try to set the last query to the indicators
+        # Try to set the last query to the program's indicators
         try:
             last_query = self.indicators[program]
+        # If it doesn't work, try opening the program's indicators first
         except KeyError:
             logging.warning("Indicators for %s apparently not loaded. Loading now...", program)
             self.indicators[program] = pd.read_excel(self.indicators_loc + "/{} Indicators.xlsx".format(program))
