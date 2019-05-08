@@ -133,12 +133,14 @@ class ReportGenerator(object):
         logging.info("ReportGenerator initialization done!")
 
 
-    def _parse_row(self, row):
+    def _parse_row(self, row, program):
         """Turn a row of a Pandas DataFrame into a dictionary and bin list
 
         The data stored in the master indicator spreadsheets needs to be cleaned up
-        properly for a Report to use it. This function does that based on things
-        in the ReportConfig.
+        properly for a Report object to use it. This function does that based on things
+        in the ReportConfig. Program gets passed to the function because that is currently
+        not stored in the indicators spreadsheet and needs to end up on the Report object
+        somehow. This seemed like the most reasonable place to do it.
 
         ReportConfig.header_attribs determines what data gets pulled from the
         spreadsheet. For a single entry in header_attribs, multiple values
@@ -147,7 +149,8 @@ class ReportGenerator(object):
         'Course #' and 'Course Description' using a ' - ' character
 
         Args:
-            row: The row of a Pandas DataFrame (so a Pandas Series) to clean up
+            row(pd.Series): The row of a Pandas DataFrame (so a Pandas Series) to pull data from
+            program(string): The program that the indicator file row belongs to
 
         Returns:
             dict: A dictionary containing the indicator information, keyed using instructions
@@ -180,6 +183,10 @@ class ReportGenerator(object):
             # )
             indicator_dict[key] = ' - '.join(occurrences)
             # logging.debug("Entry [%s]: %s", key, indicator_dict[key])
+        
+        # If Program is in indicator_dict, add the program parameter to indicator_dict
+        if 'Program' in indicator_dict.keys():
+            indicator_dict['Program'] = program
 
         # logging.info("Returning indicator dictionary and bins from this row")
         return indicator_dict, bins
@@ -271,7 +278,7 @@ class ReportGenerator(object):
                 # ReportConfig determine what gets pulled and what doesn't. These are also 
                 # JSON-loadable. Program gets added to indicator data later if required.
                 #------------------------------------------------------------------------------
-                indicator_data, bins = self._parse_row(row)
+                indicator_data, bins = self._parse_row(row, program)
                 # If no bins were parsed, a histogram cannot be generated. Skip this indicator/row
                 if not bins:
                     logging.warning("ERROR: No useable bins for {} {} {} {}, skipping row".format(
