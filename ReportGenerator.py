@@ -421,8 +421,9 @@ class ReportGenerator(object):
                                 asmt = row["Method of Assessment"],
                                 i = i,
                                 cfg = self.config.name,
-                                # row is rownumber + 1 because Pandas indexes from 0, zfill adds padding zeros
-                                row = str(rownumber + 1).zfill(3),
+                                # row is rownumber + 2 because Pandas indexes from 0 starting from row 2 in
+                                # the original spreadsheet. zfill adds padding zeros
+                                row = str(rownumber + 2).zfill(3),
                                 dataloc = location
                             )
                             # Make sure the save directory exists, then save the file
