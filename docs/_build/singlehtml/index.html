@@ -1,0 +1,1334 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>CI_ReportGen documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html#document-index" class="icon icon-home"> CI_ReportGen
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-ReportConfig">ReportConfig</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-DataStore">DataStore</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-grades_org">grades_org</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-textformatting">textformatting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-Report">Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-ReportGenerator">ReportGenerator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-procedures">procedures</a></li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html#document-index">CI_ReportGen</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html#document-index">Docs</a> &raquo;</li>
+        
+      <li>CI_ReportGen  documentation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="welcome-to-ci-reportgen-s-documentation">
+<h1>Welcome to CI_ReportGen’s documentation!<a class="headerlink" href="#welcome-to-ci-reportgen-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>CI_ReportGen is a project built to automatically generate histogram reports for the Continuous Improvement (CI)
+Program at Memorial University of Newfoundland’s Faculty of Engineering and Applied Science. The following
+documentation primarily covers the code itself. For information on external file setup or installation, consult
+the project’s GitHub Wiki.</p>
+<div class="toctree-wrapper compound">
+<span id="document-ReportConfig"></span><div class="section" id="reportconfig">
+<h2>ReportConfig<a class="headerlink" href="#reportconfig" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ReportConfig.ReportConfig">
+<em class="property">class </em><code class="descclassname">ReportConfig.</code><code class="descname">ReportConfig</code><span class="sig-paren">(</span><em>config_file=None</em>, <em>config_path=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ReportConfig.ReportConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Report options/configurations</p>
+<p>A class that stores parameters used for various automations in a Report
+object. This class allows JSON loading so that popular templates can
+be saved and re-used. Also opens the MUN logo and keeps it open so that
+during Report autogeneration, it does not have to be closed and re-opened
+many times. The JSON configurations load their parameters last, so they
+can be used to override class attributes if desired.</p>
+<p>The first JSON file the program loads is default.json, which it always does.
+It then loads any config files passed as arguments during initialization.</p>
+<p><strong>These attributes are JSON-loaded</strong></p>
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.name">
+<code class="descname">name</code><a class="headerlink" href="#ReportConfig.ReportConfig.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of the configuration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.annotation_font">
+<code class="descname">annotation_font</code><a class="headerlink" href="#ReportConfig.ReportConfig.annotation_font" title="Permalink to this definition">¶</a></dt>
+<dd><p>The font size of the annotations. All other font sizes
+are derived from this font size. Default size is 16</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int or float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.dpi">
+<code class="descname">dpi</code><a class="headerlink" href="#ReportConfig.ReportConfig.dpi" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dots per inch of the generated Report. Default is 150</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.orientation">
+<code class="descname">orientation</code><a class="headerlink" href="#ReportConfig.ReportConfig.orientation" title="Permalink to this definition">¶</a></dt>
+<dd><p>The plot orientation. The current choices are ‘landscape’
+and ‘portrait.’ The ‘portrait’ orientation might not work properly but
+has not been tested. Defaults to ‘landscape’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.format">
+<code class="descname">format</code><a class="headerlink" href="#ReportConfig.ReportConfig.format" title="Permalink to this definition">¶</a></dt>
+<dd><p>The save format for the Report. Defaults to ‘pdf’ but any
+file extension supported by Plotly’s Static Image Export should
+work (<a class="reference external" href="https://plot.ly/python/static-image-export/">https://plot.ly/python/static-image-export/</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.max_plots">
+<code class="descname">max_plots</code><a class="headerlink" href="#ReportConfig.ReportConfig.max_plots" title="Permalink to this definition">¶</a></dt>
+<dd><p>The maximum number of plots that can be on a Report’s
+histogram at once. Defaults to 6</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.add_title">
+<code class="descname">add_title</code><a class="headerlink" href="#ReportConfig.ReportConfig.add_title" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a graph title (Default True)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.graph_title">
+<code class="descname">graph_title</code><a class="headerlink" href="#ReportConfig.ReportConfig.graph_title" title="Permalink to this definition">¶</a></dt>
+<dd><p>The title that should be added
+to the graph. Can be a formatted string and the generator will
+automatically try to put cohort in it (i.e. “Grade Distribution
+for Co{}” could become “Grade Distribution for Co2020”). Defaults
+to “GRADE DISTRIBUTION”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string or formatted string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.add_percents">
+<code class="descname">add_percents</code><a class="headerlink" href="#ReportConfig.ReportConfig.add_percents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show bar percentages (Default True)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.add_legend">
+<code class="descname">add_legend</code><a class="headerlink" href="#ReportConfig.ReportConfig.add_legend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show legend (Default True)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.add_bin_ranges">
+<code class="descname">add_bin_ranges</code><a class="headerlink" href="#ReportConfig.ReportConfig.add_bin_ranges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the bin range description (Default True)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.show_NDA">
+<code class="descname">show_NDA</code><a class="headerlink" href="#ReportConfig.ReportConfig.show_NDA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether or not a ‘No Data Available’ bin
+should appear on some plots. The condition for this bin is
+specified with NDA_threshold</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.NDA_threshold">
+<code class="descname">NDA_threshold</code><a class="headerlink" href="#ReportConfig.ReportConfig.NDA_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the percentage of no data entries is greater
+than or equal to this threshold value, the ‘No Data Available’
+bin will appear for ALL plots. Defaults to 0.10, or 10%</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.header_attribs">
+<code class="descname">header_attribs</code><a class="headerlink" href="#ReportConfig.ReportConfig.header_attribs" title="Permalink to this definition">¶</a></dt>
+<dd><p>A comma-separated string of the
+categories that should be added to a Report header (e.g. ‘Graduate
+Attribute, Indicator, Assessment’)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>comma-separated string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.header_xloc">
+<code class="descname">header_xloc</code><a class="headerlink" href="#ReportConfig.ReportConfig.header_xloc" title="Permalink to this definition">¶</a></dt>
+<dd><p>The x location of the header</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.header_yloc">
+<code class="descname">header_yloc</code><a class="headerlink" href="#ReportConfig.ReportConfig.header_yloc" title="Permalink to this definition">¶</a></dt>
+<dd><p>The y location of the header</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.textwrap_lim">
+<code class="descname">textwrap_lim</code><a class="headerlink" href="#ReportConfig.ReportConfig.textwrap_lim" title="Permalink to this definition">¶</a></dt>
+<dd><p>The limit on textwrap for the header. Defaults to 72 characters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p><strong>These attributes are NOT JSON-loaded</strong></p>
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.MUN_logo">
+<code class="descname">MUN_logo</code><a class="headerlink" href="#ReportConfig.ReportConfig.MUN_logo" title="Permalink to this definition">¶</a></dt>
+<dd><p>The MUN logo in base64</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.font_sizes">
+<code class="descname">font_sizes</code><a class="headerlink" href="#ReportConfig.ReportConfig.font_sizes" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary of font sizes used in the Report</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.paper_dimensions">
+<code class="descname">paper_dimensions</code><a class="headerlink" href="#ReportConfig.ReportConfig.paper_dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary of tuples indicating paper dimensions</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.indicators_loc">
+<code class="descname">indicators_loc</code><a class="headerlink" href="#ReportConfig.ReportConfig.indicators_loc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Where the program can find the indicator master sheets</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.grades_loc">
+<code class="descname">grades_loc</code><a class="headerlink" href="#ReportConfig.ReportConfig.grades_loc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Where the program can find grades files</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportConfig.ReportConfig.histograms_loc">
+<code class="descname">histograms_loc</code><a class="headerlink" href="#ReportConfig.ReportConfig.histograms_loc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Where the program should save histograms</p>
+</dd></dl>
+
+<div class="admonition-todo admonition" id="index-0">
+<p class="admonition-title">Todo</p>
+<ul class="simple">
+<li><p>Implement a config saving feature using the class?</p></li>
+</ul>
+</div>
+<dl class="method">
+<dt id="ReportConfig.ReportConfig.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>config_file=None</em>, <em>config_path=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ReportConfig.ReportConfig.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object initializes from configuration file</p>
+<p>Object also opens the MUN logo</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config_file</strong> (<em>string</em>) – A configuration to use. Defaults to using just
+the default configuration</p></li>
+<li><p><strong>config_path</strong> – The path to the config folders. Defaults to finding it
+with os.path</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span id="document-DataStore"></span><div class="section" id="datastore">
+<h2>DataStore<a class="headerlink" href="#datastore" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="DataStore.DataStore">
+<em class="property">class </em><code class="descclassname">DataStore.</code><code class="descname">DataStore</code><span class="sig-paren">(</span><em>programs=None</em>, <em>indicators_loc=None</em>, <em>grades_loc=None</em><span class="sig-paren">)</span><a class="headerlink" href="#DataStore.DataStore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Data Storage object</p>
+<p>An object that stores all of the indicator data in one place. This object was
+built to be replaced by a database interface (hence the name), and many of the
+methods reflect that. For example, the object has a query method.</p>
+<dl class="attribute">
+<dt id="DataStore.DataStore.indicators">
+<code class="descname">indicators</code><a class="headerlink" href="#DataStore.DataStore.indicators" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary of Pandas DataFrames that store
+the indicator information for each loaded program. The dictionary gets
+keyed by program</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict(pd.DataFrame)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="DataStore.DataStore.indicators_loc">
+<code class="descname">indicators_loc</code><a class="headerlink" href="#DataStore.DataStore.indicators_loc" title="Permalink to this definition">¶</a></dt>
+<dd><p>The path to the location of the indicator sheets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="DataStore.DataStore.grades_loc">
+<code class="descname">grades_loc</code><a class="headerlink" href="#DataStore.DataStore.grades_loc" title="Permalink to this definition">¶</a></dt>
+<dd><p>The path to the top folder for the grade storage</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="DataStore.DataStore.backup_file_lists">
+<code class="descname">backup_file_lists</code><a class="headerlink" href="#DataStore.DataStore.backup_file_lists" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dict of lists that store the file names
+in the backup grades subdirectories determined in ReportConfig. These
+lists allow histogram generation for programs in the cases of no
+program-specific data and also allow generation of histograms for
+Core and Co-op.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict(list)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="DataStore.DataStore.unique_courses">
+<code class="descname">unique_courses</code><a class="headerlink" href="#DataStore.DataStore.unique_courses" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Pandas DataFrame that contains information
+on courses that do not follow the standard term offered rule or that are
+not stored in the usual format. Usually, the first integer in a course
+tag (e.g. ENGI 3424) indicates the term that course is offered. However,
+some courses like CHEM 1051 are taken in term 3. Any courses that do not
+have grades stored by academic year and term offered should also be in
+this table (e.g. MATH 2000 was pulled from Banner, and the grades are
+stored by cohort). The data gets loaded from an Excel file that the object
+looks for one directory above this one called “Unique Courses.xlsx”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="index.html#ReportConfig.ReportConfig" title="ReportConfig.ReportConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReportConfig</span></code></a></p></li>
+</ul>
+</div>
+<dl class="method">
+<dt id="DataStore.DataStore.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>programs=None</em>, <em>indicators_loc=None</em>, <em>grades_loc=None</em><span class="sig-paren">)</span><a class="headerlink" href="#DataStore.DataStore.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialization, load indicators</p>
+<p>Initializes the indicator DataFrame with data from the programs list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>programs</strong> (<em>list</em><em>(</em><em>string</em><em>)</em>) – A list of strings containing the programs to
+load indicators for. Defaults to loading indicators for every program</p></li>
+<li><p><strong>indicators_loc</strong> (<em>string</em>) – The file location for the Indicator lists. Defaults to
+finding them in the project directory using OS.path</p></li>
+<li><p><strong>grades_loc</strong> (<em>string</em>) – The location of the grades sheets. Defaults to finding
+them in the project directory using OS.path</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="DataStore.DataStore.query_indicators">
+<code class="descname">query_indicators</code><span class="sig-paren">(</span><em>program</em>, <em>dict_of_queries=None</em><span class="sig-paren">)</span><a class="headerlink" href="#DataStore.DataStore.query_indicators" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query indicators sheet</p>
+<p>Queries a specific program’s indicator list and returns a DataFrame
+containing all of the search results. The query behaves iteratively
+(i.e. it will query one option, then the next option, then the next,
+etc.).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>program</strong> (<em>string</em>) – The program to search for the indicator</p></li>
+<li><p><strong>dict_of_queries</strong> (<em>dict</em><em>(</em><em>list</em><em>)</em>) – A dictionary of lists of things to</p></li>
+<li><p><strong>The program will try to match up each dictionary key with</strong> (<em>query.</em>) – </p></li>
+<li><p><strong>first column it finds that contains part of the key in the</strong> (<em>the</em>) – </p></li>
+<li><p><strong>DataFrame. If None</strong><strong>, </strong><strong>the method will not query and will</strong> (<em>indicators</em>) – </p></li>
+<li><p><strong>return the corresponding program's indicator DataFrame</strong> (<em>just</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The DataFrame query</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span id="document-grades_org"></span><div class="section" id="module-grades_org">
+<span id="grades-org"></span><h2>grades_org<a class="headerlink" href="#module-grades_org" title="Permalink to this headline">¶</a></h2>
+<p>Grades organization functions</p>
+<p>This file, along with DataStore.py, are designed to be eventually replaced by a
+proper database interface. Some of the functions may be able to carry over.</p>
+<dl class="function">
+<dt id="grades_org.cols_to_cohorts">
+<code class="descclassname">grades_org.</code><code class="descname">cols_to_cohorts</code><span class="sig-paren">(</span><em>grades</em>, <em>course_name</em>, <em>course_term_offered=None</em><span class="sig-paren">)</span><a class="headerlink" href="#grades_org.cols_to_cohorts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rename columns of a grades DataFrame to be cohorts</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grades</strong> – A Pandas DataFrame with column names of either academic year or
+cohort (i.e. 201701 or 2017 as academic year notation, or 2022 as
+cohort)</p></li>
+<li><p><strong>course_name</strong> – The name of the course that the grades DataFrame is for.
+Variable gets passed to get_cohort from textformatting.</p></li>
+<li><p><strong>course_term_offered</strong> – The term that a course is offered. Variable gets
+passed to get_cohort function from textformatting.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of strings, all as cohort messages</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list(str)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="grades_org.directory_search">
+<code class="descclassname">grades_org.</code><code class="descname">directory_search</code><span class="sig-paren">(</span><em>course</em>, <em>assessment</em>, <em>main_dir</em>, <em>subdirs</em><span class="sig-paren">)</span><a class="headerlink" href="#grades_org.directory_search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search a list of directories for a course file</p>
+<p>This method uses find_grades_file multiple times to construct a dictionary
+of lists to return.</p>
+<p>Example Return:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;ENCM&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ENGI 1040 Circuits Grade - ENCM.xlsx&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;Core&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;ENGI 1040 Circuits Grade - Core - Custom column names.xlsx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENGI 1040 Circuits Grade - Core.xlsx&quot;</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;ECE&quot;</span><span class="p">:</span> <span class="p">[]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>course</strong> – The course number to search for (i.e. ‘ENGI 3891’)</p></li>
+<li><p><strong>assessment</strong> – The assessment type to search for (i.e. ‘Final Exam’)</p></li>
+<li><p><strong>main_dir</strong> – The path to the main search directory</p></li>
+<li><p><strong>subdirs</strong> – The subdirectories to search</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A defaultdict of lists that contain all matches from a directory</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>results</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="grades_org.find_grades_files">
+<code class="descclassname">grades_org.</code><code class="descname">find_grades_files</code><span class="sig-paren">(</span><em>course</em>, <em>assessment</em>, <em>file_list</em><span class="sig-paren">)</span><a class="headerlink" href="#grades_org.find_grades_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find grades files in a list</p>
+<p>This search function finds files based on the following requirements:
+- The name starts with the Course #
+- The assessment type is in the file name
+- The file is an Excel spreadsheet (ends with .xlsx)
+When searching, it ignores case and spacing</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>course</strong> – The course number to search for (i.e. ‘ENGI 3891’)</p></li>
+<li><p><strong>assessment</strong> – The assessment type to search for (i.e. ‘Final Exam’)</p></li>
+<li><p><strong>file_list</strong> – The list of files to search</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of all file names that match the search criteria</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="grades_org.open_grades">
+<code class="descclassname">grades_org.</code><code class="descname">open_grades</code><span class="sig-paren">(</span><em>row</em>, <em>program</em>, <em>course_col_name=None</em>, <em>assessment_col_name=None</em>, <em>grades_top_folder=None</em>, <em>file=None</em><span class="sig-paren">)</span><a class="headerlink" href="#grades_org.open_grades" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a Pandas DataFrame containing grades associated to Indicator sheet row</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>row</strong> – A row from a Pandas DataFrame (so a Pandas Series) that contains
+Indicator query data</p></li>
+<li><p><strong>course_col_name</strong> – The name of the column that stores course number.
+Default is ‘Course #’</p></li>
+<li><p><strong>assessment_col_name</strong> – The name of the column that stores assessment.
+Default is ‘Method of Assessment’</p></li>
+<li><p><strong>grades_top_folder</strong> – The folder where the grade storage hierarchy starts.
+Uses os.path by default to find it</p></li>
+<li><p><strong>file</strong> – An override variable. Pass the function the right file name, and
+it’ll just open the file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a DataFrame containing the grades</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Exceptions:</dt><dd><p>FileNotFoundError: Raises an error when the grades file cannot be opened (comes from Pandas)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="grades_org.true_size">
+<code class="descclassname">grades_org.</code><code class="descname">true_size</code><span class="sig-paren">(</span><em>ser</em><span class="sig-paren">)</span><a class="headerlink" href="#grades_org.true_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obtains the true size of a Pandas Series</p>
+<p>When getting the size of a Pandas Series, any NaN or Null entries are considered
+in the count. This becomes problematic when getting student counts because Pandas
+has to append Null values to the end of DataFrame columns when the columns are not
+the same size. As a result, all cohorts end up being the same size, even though
+that’s not true. This function strips out the null values and returns the true size
+of the list. As a note, 0’s are not stripped from the list; what gets stripped is
+determined by pd.isnull()</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ser</strong> – A Pandas Series</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The size of the Pandas Series without null values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<span id="document-textformatting"></span><div class="section" id="module-textformatting">
+<span id="textformatting"></span><h2>textformatting<a class="headerlink" href="#module-textformatting" title="Permalink to this headline">¶</a></h2>
+<p>Functions for formatting text in different ways</p>
+<dl class="function">
+<dt id="textformatting.format_annotation_text">
+<code class="descclassname">textformatting.</code><code class="descname">format_annotation_text</code><span class="sig-paren">(</span><em>header_info</em>, <em>textwrap_lim=60</em>, <em>sep='&lt;br&gt;'</em><span class="sig-paren">)</span><a class="headerlink" href="#textformatting.format_annotation_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a table-like format for the header text on a Report</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>header_info</strong> – A dictionary containing all of the elements that you want
+to show on the Report. The only required entry in the dictionary is
+“Graduate Attribute,” the others are optional</p></li>
+<li><p><strong>textwrap_lim</strong> – The character limit on text wrapping. Defaults to 60</p></li>
+<li><p><strong>sep</strong> – The separator character for the output string. Defaults to ‘&lt;br&gt;’
+as required by Plotly</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The ‘labels’ for the elements to graph, separated by HTML line</dt><dd><p>breaks (&lt;br&gt;) that Plotly can use to create newlines in an annotation</p>
+</dd>
+<dt>string: The ‘descriptions’ for the elements to graph, separated like the</dt><dd><p>last string</p>
+</dd>
+<dt>string: The Graduate Attribute is returned in a separate string so that</dt><dd><p>its font size can be increased on a Report</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="textformatting.format_bin_ranges">
+<code class="descclassname">textformatting.</code><code class="descname">format_bin_ranges</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_labels</em><span class="sig-paren">)</span><a class="headerlink" href="#textformatting.format_bin_ranges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format bins into a text description</p>
+<p>Currently, this uses a fairly inelegant solution for formatting co-op bins.
+If the difference between the first and last bin is 1, then the function
+calls a different one and returns the results of that</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bins</strong> (<em>list</em><em>(</em><em>int</em><em>)</em>) – A list of integers representing bin ranges. Expects
+to receive 5 numbers (i.e. [0, 55, 65, 80, 100])</p></li>
+<li><p><strong>bin_labels</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – A list of string titles for the bin categories.
+Uses the size of these bin labels to determine iteration</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A string describing the bin ranges</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="textformatting.format_coop_bins">
+<code class="descclassname">textformatting.</code><code class="descname">format_coop_bins</code><span class="sig-paren">(</span><em>bins</em>, <em>bin_labels</em><span class="sig-paren">)</span><a class="headerlink" href="#textformatting.format_coop_bins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Co-op bin label formatting</p>
+<p>Co-op bins won’t format like the standard formatting method. This function
+handles the co-op binning exceptions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bins</strong> – The bin ranges. They are probably [0,2,3,4,5] if this function was
+called, and the function will behave as if they were. This allows
+for validation down the road if the binning message shows up really
+weird and nonsensical on a histogram</p></li>
+<li><p><strong>bin_labels</strong> – The labels for the bins</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A string describing the bin ranges</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="textformatting.format_percents">
+<code class="descclassname">textformatting.</code><code class="descname">format_percents</code><span class="sig-paren">(</span><em>values</em><span class="sig-paren">)</span><a class="headerlink" href="#textformatting.format_percents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turn NumPy array values into list of percentage strings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>values</strong> – a NumPy array (or other iterable) containing numbers</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of the numbers in percent format with no decimal places</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list(str)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="textformatting.get_cohort">
+<code class="descclassname">textformatting.</code><code class="descname">get_cohort</code><span class="sig-paren">(</span><em>year</em>, <em>course=None</em>, <em>term_taken=None</em><span class="sig-paren">)</span><a class="headerlink" href="#textformatting.get_cohort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a year to equivalent cohort</p>
+<p>The function cannot determine cohort for a work term course (i.e. ENGI 001W),
+so it assumes that the column name passed to it is a cohort and will simply
+return the year value passed back to it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>year</strong> – a number containing year and optionally, semester (which will be ignored)
+Examples: 2017, 201703, 2019</p></li>
+<li><p><strong>course</strong> – The course name or number</p></li>
+<li><p><strong>term_taken</strong> – An override variable for courses that have unconventional
+numbering, such as CHEM1051 being taken in term 3.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The equivalent cohort</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="textformatting.get_cohort_coop">
+<code class="descclassname">textformatting.</code><code class="descname">get_cohort_coop</code><span class="sig-paren">(</span><em>year_and_semester</em>, <em>WT</em><span class="sig-paren">)</span><a class="headerlink" href="#textformatting.get_cohort_coop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the cohort of a work term student</p>
+<p>On a given work term, there can be 2 possible cohorts, and these can be
+calculated. See the following example:</p>
+<table class="docutils align-center">
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 70%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>year and semester</p></th>
+<th class="head"><p>cohort (work term numbers)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Fall 2017 (201701)</p></td>
+<td><p>2020(1-3) and 2018(4)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Winter 2018 (201702)</p></td>
+<td><p>2021(1-2) and 2019(3-4)</p></td>
+</tr>
+<tr class="row-even"><td><p>Spring 2018 (201703)</p></td>
+<td><p>2022(1) and 2020(2-4)</p></td>
+</tr>
+</tbody>
+</table>
+<p>The first possible cohort is year + semester + 2. See below:</p>
+<blockquote>
+<div><p>2017 + 1 + 2 = 2020
+2017 + 2 + 2 = 2021
+2017 + 3 + 2 = 2022</p>
+</div></blockquote>
+<p>The second possible cohort in a semester is just year + semester, or the
+first possible cohort - 2.</p>
+<p>There is a relation between semester and work term number associated with
+a cohort. The semester indicates how many work terms belong to a cohort.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>If the semester number is 1, work terms 1-3 map to the first cohort</p></li>
+<li><p>If the semester number is 2, work terms 1-2 map to the first cohort</p></li>
+<li><p>If the semester number is 3, work term 1 maps to the first cohort</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>year_and_semester</strong> – Academic year format for when the work term was
+taken (i.e. 201703)</p></li>
+<li><p><strong>WT</strong> – Student work term number (from 1 to 4)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The cohort of the student</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Exceptions:</dt><dd><p>ValueError: Raised when the function does not receive a  WT value from 1 to 4</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<span id="document-Report"></span><div class="section" id="report">
+<h2>Report<a class="headerlink" href="#report" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="Report.Report">
+<em class="property">class </em><code class="descclassname">Report.</code><code class="descname">Report</code><span class="sig-paren">(</span><em>indicator_data</em>, <em>bins</em>, <em>config=None</em><span class="sig-paren">)</span><a class="headerlink" href="#Report.Report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Inputs-based Report class using Plot.ly(<a class="reference external" href="https://plot.ly/python/">https://plot.ly/python/</a>) to generate histograms</p>
+<p>Many attributes that define properties about the plot are
+stored in a ReportConfig object that this one has reference to. For more
+information, see the ReportConfig docstring. For the most part, this object
+assumes that input data has already been validated.</p>
+<dl class="attribute">
+<dt id="Report.Report.config">
+<code class="descname">config</code><a class="headerlink" href="#Report.Report.config" title="Permalink to this definition">¶</a></dt>
+<dd><p>A ReportConfig object</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Report.Report.layout">
+<code class="descname">layout</code><a class="headerlink" href="#Report.Report.layout" title="Permalink to this definition">¶</a></dt>
+<dd><p>A plotly.Layout that generates from certain attributes in
+ReportConfig</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Report.Report.indicator_data">
+<code class="descname">indicator_data</code><a class="headerlink" href="#Report.Report.indicator_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary containing any information needed on a
+histogram header. The dictionary needs to at least contain
+“Graduate Attribute” as one of its keys, but other than that,
+the keys are optional</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Report.Report.bins">
+<code class="descname">bins</code><a class="headerlink" href="#Report.Report.bins" title="Permalink to this definition">¶</a></dt>
+<dd><p>The bin range for this assessment to use. Should be a 4-digit
+list if the bottom bin restriction is 0. If the bins are passed as
+5-digit, then the first one will be used as the lowest bin</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Report.Report._annotations">
+<code class="descname">_annotations</code><a class="headerlink" href="#Report.Report._annotations" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of plotly.layout.Annotation objects that the object
+uses when the Report is built into a Figure</p>
+</dd></dl>
+
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="index.html#ReportConfig.ReportConfig" title="ReportConfig.ReportConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReportConfig</span></code></a></p>
+</div>
+<dl class="method">
+<dt id="Report.Report.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>indicator_data</em>, <em>bins</em>, <em>config=None</em><span class="sig-paren">)</span><a class="headerlink" href="#Report.Report.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object initialization</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>indicator_data</strong> – A dictionary containing relevant indicator data to
+plot. The only required entry to the dictionary is Graduate
+Attribute, the others are optional. For more information, see
+textformatting.format_annotation_text</p></li>
+<li><p><strong>bins</strong> – A list of floats containing bin ranges that comes from the
+indicator lookup tables. What that means is that the program
+expects to recieve 4 values (i.e. [55.0, 65.0, 80.0, 100.0])</p></li>
+<li><p><strong>config</strong> – a ReportConfig object reference that the object uses
+to configure various parameters. Uses a default config if
+none is passed as an argument</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Report.Report.add_bin_ranges">
+<code class="descname">add_bin_ranges</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Report.Report.add_bin_ranges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add bin ranges to bottom of plot</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Report.Report.add_header">
+<code class="descname">add_header</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Report.Report.add_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the header information to the annotations list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Report.Report.add_title">
+<code class="descname">add_title</code><span class="sig-paren">(</span><em>cohort=''</em><span class="sig-paren">)</span><a class="headerlink" href="#Report.Report.add_title" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add graph title to the Report</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>cohort</strong> – The cohort to add to the title, assuming that the title
+string in the ReportConfig is a formatted string. Defaults
+to an empty string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="Report.Report.generate_report">
+<em class="property">static </em><code class="descname">generate_report</code><span class="sig-paren">(</span><em>indicator_data</em>, <em>bins</em>, <em>config</em>, <em>grades</em><span class="sig-paren">)</span><a class="headerlink" href="#Report.Report.generate_report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a histogram Report object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>indicator_data</strong> – A dictionary containing any information needed on a
+histogram header. The dictionary needs to at least contain
+“Graduate Attribute” as one of its keys, but other than that,
+the keys are optional</p></li>
+<li><p><strong>bins</strong> – The bin range for this assessment to use. Should be a 4-digit
+list if the bottom bin restriction is 0. If the bins are passed as
+5-digit, then the first one will be used as the lowest bin</p></li>
+<li><p><strong>config</strong> – A ReportConfig object</p></li>
+<li><p><strong>grades</strong> – A Pandas DataFrame containing the grades that have to be plotted.
+The columns of the DataFrame get used as legend entries</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The Report object generated</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="index.html#Report.Report" title="Report.Report">Report</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Report.Report.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>grades</em><span class="sig-paren">)</span><a class="headerlink" href="#Report.Report.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the stored assessment</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>grades</strong> – A pandas DataFrame storing the grades that need to be plotted.
+The program will use the column names of the DataFrame as the legend
+entries</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Report.Report.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>savename</em>, <em>format=None</em><span class="sig-paren">)</span><a class="headerlink" href="#Report.Report.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save Report object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>savename</strong> (<em>string</em>) – Save file name</p></li>
+<li><p><strong>format</strong> (<em>string</em>) – The file format to save to. Uses whatever config uses by default.
+If the file savename does not have the save format attached by default, this
+program will attach it.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span id="document-ReportGenerator"></span><div class="section" id="reportgenerator">
+<h2>ReportGenerator<a class="headerlink" href="#reportgenerator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ReportGenerator.ReportGenerator">
+<em class="property">class </em><code class="descclassname">ReportGenerator.</code><code class="descname">ReportGenerator</code><span class="sig-paren">(</span><em>config</em>, <em>programs=None</em>, <em>cohorts=None</em>, <em>whitelist=None</em>, <em>ds=None</em>, <em>indicators_loc=None</em>, <em>grades_loc=None</em>, <em>histograms_loc=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ReportGenerator.ReportGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Assists with generating histogram reports</p>
+<p>Bundles all of the Report object generation things in one place and adds
+convenience methods for generation</p>
+<dl class="attribute">
+<dt id="ReportGenerator.ReportGenerator.config">
+<code class="descname">config</code><a class="headerlink" href="#ReportGenerator.ReportGenerator.config" title="Permalink to this definition">¶</a></dt>
+<dd><p>A ReportConfig object that the generator passes to each
+generated Report</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="index.html#ReportConfig.ReportConfig" title="ReportConfig.ReportConfig">ReportConfig</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportGenerator.ReportGenerator.programs">
+<code class="descname">programs</code><a class="headerlink" href="#ReportGenerator.ReportGenerator.programs" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of programs (e.g. ENCM) to process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list(string)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportGenerator.ReportGenerator.whitelist">
+<code class="descname">whitelist</code><a class="headerlink" href="#ReportGenerator.ReportGenerator.whitelist" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary including lists of the only things that should
+be processed. Options can include, but are not limited to, lists of:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Courses</p></li>
+<li><p>Indicators</p></li>
+<li><p>Assessments</p></li>
+</ul>
+</div></blockquote>
+<p>As long as the whitelist key matches closely to the column name in
+the indicator lookup table, it should be fine</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportGenerator.ReportGenerator.ds">
+<code class="descname">ds</code><a class="headerlink" href="#ReportGenerator.ReportGenerator.ds" title="Permalink to this definition">¶</a></dt>
+<dd><p>A DataStore object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="index.html#DataStore.DataStore" title="DataStore.DataStore">DataStore</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ReportGenerator.ReportGenerator.TODO">
+<code class="descname">TODO</code><a class="headerlink" href="#ReportGenerator.ReportGenerator.TODO" title="Permalink to this definition">¶</a></dt>
+<dd><ul class="simple">
+<li><p>Implement a blacklisting feature</p></li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="ReportGenerator.ReportGenerator.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>config</em>, <em>programs=None</em>, <em>cohorts=None</em>, <em>whitelist=None</em>, <em>ds=None</em>, <em>indicators_loc=None</em>, <em>grades_loc=None</em>, <em>histograms_loc=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ReportGenerator.ReportGenerator.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object Initialization</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference internal" href="index.html#ReportConfig.ReportConfig" title="ReportConfig.ReportConfig"><em>ReportConfig</em></a>) – A ReportConfig object</p></li>
+<li><p><strong>programs</strong> (<em>string</em><em> or </em><em>list</em><em>(</em><em>string</em><em>)</em>) – A list of programs to generate indicators for.
+Defaults to using all programs. If only one string is passed in, it will
+get put into a size-one list.</p></li>
+<li><p><strong>cohorts</strong> (<em>int</em><em> or </em><em>list</em><em>(</em><em>int</em><em>)</em>) – A list of cohorts to pull data from. Defaults to
+using all cohorts. If only one cohort is passed in, it will get put into
+a size-one list.</p></li>
+<li><p><strong>whitelist</strong> (<em>dictionary</em>) – A dictionary of lists, keyed by the only stuff
+to parse (e.g. ‘course’, ‘indicator’, etc.) and filled with the
+specific values to uniquely parse. Defaults to no whitelist. The lists
+in the dictionaries can be partial (i.e. if you pass ‘KB’ as part of the
+‘indicator’ whitelist, it will pull all ‘KB’ indicators). If the
+lists contain only one string, that string gets put into a
+size-one list.</p></li>
+<li><p><strong>ds</strong> (<a class="reference internal" href="index.html#DataStore.DataStore" title="DataStore.DataStore"><em>DataStore</em></a>) – A DataStore object. Defaults to generating one based on the
+whitelist entries for ‘programs’</p></li>
+<li><p><strong>indicators_loc</strong> (<em>string</em>) – The location of the indicator sheets. Defaults to
+searching an “Indicators” folder in the directory above the project
+(see ReportConfig for more info)</p></li>
+<li><p><strong>grades_loc</strong> (<em>string</em>) – The location of the grades sheets. Defaults to searching
+a “Grades” folder in the directory above the project (see
+ReportConfig for more info)</p></li>
+<li><p><strong>histograms_loc</strong> (<em>string</em>) – The location to store histograms. Defaults to using
+a “Histograms” folder in the directory above the project (see
+ReportConfig for more info)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="ReportGenerator.ReportGenerator.autogenerate">
+<em class="property">static </em><code class="descname">autogenerate</code><span class="sig-paren">(</span><em>config</em>, <em>programs=None</em>, <em>cohorts=None</em>, <em>whitelist=None</em>, <em>ds=None</em>, <em>indicators_loc=None</em>, <em>grades_loc=None</em>, <em>histograms_loc=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ReportGenerator.ReportGenerator.autogenerate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shortcut to start histogram generation</p>
+<p>Initializes a ReportGenerator object and immediately starts report generation.</p>
+<div class="admonition-todo admonition" id="index-0">
+<p class="admonition-title">Todo</p>
+<ul class="simple">
+<li><p>Create the method</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="ReportGenerator.ReportGenerator.start_autogenerate">
+<code class="descname">start_autogenerate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ReportGenerator.ReportGenerator.start_autogenerate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Begin autogeneration of reports</p>
+<p>The general procedure goes as follows:
+* Iterate across the stored indicator lookup tables:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Query the indicator table using the whitelist</p></li>
+<li><p>Iterate through the query:</p>
+<ul>
+<li><p>Get indicator data from the row</p></li>
+<li><p>Search for grades for the assessment tool</p></li>
+<li><p>Iterate through each file found and save a histogram</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+<div class="admonition-todo admonition" id="index-1">
+<p class="admonition-title">Todo</p>
+<ul class="simple">
+<li><p>Decouple the method</p></li>
+<li><p>Change the histogram file naming conventions to be shorter</p></li>
+<li><p>Allow multiple assessment files to exist and get generated histograms
+(e.g. allow ‘ENGI 1040 Circuits Grade’ and ‘ENGI 1040 Circuits Grade
+by Term’ to both exist)</p></li>
+<li><p>Allow customization of the file save name through ReportConfig</p></li>
+</ul>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span id="document-procedures"></span><div class="section" id="module-procedures">
+<span id="procedures"></span><h2>procedures<a class="headerlink" href="#module-procedures" title="Permalink to this headline">¶</a></h2>
+<p>PRE-SAVED REPORT GENERATION PROCEDURES</p>
+<dl class="function">
+<dt id="procedures.histogram_by_cohort">
+<code class="descclassname">procedures.</code><code class="descname">histogram_by_cohort</code><span class="sig-paren">(</span><em>programs=None</em>, <em>whitelist=None</em>, <em>cohorts=None</em><span class="sig-paren">)</span><a class="headerlink" href="#procedures.histogram_by_cohort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate histograms by cohort</p>
+<p>For more information, see ReportGenerator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>programs</strong> (<em>string</em><em> or </em><em>list</em><em>(</em><em>string</em><em>)</em>) – The same list of programs that gets
+passed to a ReportGenerator object</p></li>
+<li><p><strong>whitelist</strong> (<em>dict</em>) – The same form of whitelist that gets passed to a
+ReportGenerator object</p></li>
+<li><p><strong>cohorts</strong> (<em>int</em><em> or </em><em>list</em><em>(</em><em>int</em><em>)</em>) – A list of cohorts to generate histograms for.
+The same list of cohorts that gets passed to a ReportGenerator object</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="procedures.separate_coop_sheet">
+<code class="descclassname">procedures.</code><code class="descname">separate_coop_sheet</code><span class="sig-paren">(</span><em>file</em>, <em>save_to='../Grades/'</em><span class="sig-paren">)</span><a class="headerlink" href="#procedures.separate_coop_sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Separate co-op date into appropriate spreadsheets</p>
+<p>The function looks for co-op spreadsheets in “(save_to)/Co-op” and will
+split them into files by work term number and question. It initially stores
+the grades in a dictionary set up like dict[course][question][cohort] and
+converts to Pandas DataFrames during saving, as DataFrames are immutable
+and are not built to be appended to.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> – The name of the file to parse</p></li>
+<li><p><strong>save_to</strong> – The top directory to save grades to. Defaults to saving them
+to a ‘Grades’ folder one directory above this one</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="procedures.separate_promo_sheet">
+<code class="descclassname">procedures.</code><code class="descname">separate_promo_sheet</code><span class="sig-paren">(</span><em>year</em>, <em>grades_dir='../Grades/'</em>, <em>filename=None</em><span class="sig-paren">)</span><a class="headerlink" href="#procedures.separate_promo_sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Separator for Engineering One promotion sheets</p>
+<p>Parses Engineering One promotion sheet and separates the data into different
+files. Expects to find promo sheets in current_directory/Grades/Core.</p>
+<p>The function can open the Excel spreadsheet in 2 ways: directly by file or
+by searching the Core folder in the grades directory for a spreadsheet that
+matches the year passed in. It will attempt to append to old grade files if
+they exist. The program has a one-time warning in place just in case the
+Grades directory gets set up improperly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>year</strong> – The year that is on the spreadsheet to process. The function
+assumes that the year is one more than the academic year (i.e.
+the file called 2018-EngOneMatch.xlsx is for academic year 2017)</p></li>
+<li><p><strong>grades_dir</strong> – The top folder of the grades. Used when finding file by
+year.</p></li>
+<li><p><strong>filename</strong> – The file to open. Overrides opening by year</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+</ul>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Ryan Letto and Memorial University of Newfoundland
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,351 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>grades_org &mdash; CI_ReportGen  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="textformatting" href="textformatting.html" />
+    <link rel="prev" title="DataStore" href="DataStore.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> CI_ReportGen
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="ReportConfig.html">ReportConfig</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DataStore.html">DataStore</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">grades_org</a></li>
+<li class="toctree-l1"><a class="reference internal" href="textformatting.html">textformatting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Report.html">Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ReportGenerator.html">ReportGenerator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="procedures.html">procedures</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CI_ReportGen</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>grades_org</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/grades_org.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-grades_org">
+<span id="grades-org"></span><h1>grades_org<a class="headerlink" href="#module-grades_org" title="Permalink to this headline">¶</a></h1>
+<p>Grades organization functions</p>
+<p>This file, along with DataStore.py, are designed to be eventually replaced by a
+proper database interface. Some of the functions may be able to carry over.</p>
+<dl class="function">
+<dt id="grades_org.cols_to_cohorts">
+<code class="descclassname">grades_org.</code><code class="descname">cols_to_cohorts</code><span class="sig-paren">(</span><em>grades</em>, <em>course_name</em>, <em>course_term_offered=None</em><span class="sig-paren">)</span><a class="headerlink" href="#grades_org.cols_to_cohorts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rename columns of a grades DataFrame to be cohorts</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grades</strong> – A Pandas DataFrame with column names of either academic year or
+cohort (i.e. 201701 or 2017 as academic year notation, or 2022 as
+cohort)</p></li>
+<li><p><strong>course_name</strong> – The name of the course that the grades DataFrame is for.
+Variable gets passed to get_cohort from textformatting.</p></li>
+<li><p><strong>course_term_offered</strong> – The term that a course is offered. Variable gets
+passed to get_cohort function from textformatting.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of strings, all as cohort messages</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list(str)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="grades_org.directory_search">
+<code class="descclassname">grades_org.</code><code class="descname">directory_search</code><span class="sig-paren">(</span><em>course</em>, <em>assessment</em>, <em>main_dir</em>, <em>subdirs</em><span class="sig-paren">)</span><a class="headerlink" href="#grades_org.directory_search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search a list of directories for a course file</p>
+<p>This method uses find_grades_file multiple times to construct a dictionary
+of lists to return.</p>
+<p>Example Return:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;ENCM&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ENGI 1040 Circuits Grade - ENCM.xlsx&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;Core&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;ENGI 1040 Circuits Grade - Core - Custom column names.xlsx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENGI 1040 Circuits Grade - Core.xlsx&quot;</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;ECE&quot;</span><span class="p">:</span> <span class="p">[]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>course</strong> – The course number to search for (i.e. ‘ENGI 3891’)</p></li>
+<li><p><strong>assessment</strong> – The assessment type to search for (i.e. ‘Final Exam’)</p></li>
+<li><p><strong>main_dir</strong> – The path to the main search directory</p></li>
+<li><p><strong>subdirs</strong> – The subdirectories to search</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A defaultdict of lists that contain all matches from a directory</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>results</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="grades_org.find_grades_files">
+<code class="descclassname">grades_org.</code><code class="descname">find_grades_files</code><span class="sig-paren">(</span><em>course</em>, <em>assessment</em>, <em>file_list</em><span class="sig-paren">)</span><a class="headerlink" href="#grades_org.find_grades_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find grades files in a list</p>
+<p>This search function finds files based on the following requirements:
+- The name starts with the Course #
+- The assessment type is in the file name
+- The file is an Excel spreadsheet (ends with .xlsx)
+When searching, it ignores case and spacing</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>course</strong> – The course number to search for (i.e. ‘ENGI 3891’)</p></li>
+<li><p><strong>assessment</strong> – The assessment type to search for (i.e. ‘Final Exam’)</p></li>
+<li><p><strong>file_list</strong> – The list of files to search</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of all file names that match the search criteria</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="grades_org.open_grades">
+<code class="descclassname">grades_org.</code><code class="descname">open_grades</code><span class="sig-paren">(</span><em>row</em>, <em>program</em>, <em>course_col_name=None</em>, <em>assessment_col_name=None</em>, <em>grades_top_folder=None</em>, <em>file=None</em><span class="sig-paren">)</span><a class="headerlink" href="#grades_org.open_grades" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a Pandas DataFrame containing grades associated to Indicator sheet row</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>row</strong> – A row from a Pandas DataFrame (so a Pandas Series) that contains
+Indicator query data</p></li>
+<li><p><strong>course_col_name</strong> – The name of the column that stores course number.
+Default is ‘Course #’</p></li>
+<li><p><strong>assessment_col_name</strong> – The name of the column that stores assessment.
+Default is ‘Method of Assessment’</p></li>
+<li><p><strong>grades_top_folder</strong> – The folder where the grade storage hierarchy starts.
+Uses os.path by default to find it</p></li>
+<li><p><strong>file</strong> – An override variable. Pass the function the right file name, and
+it’ll just open the file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a DataFrame containing the grades</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Exceptions:</dt><dd><p>FileNotFoundError: Raises an error when the grades file cannot be opened (comes from Pandas)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="grades_org.true_size">
+<code class="descclassname">grades_org.</code><code class="descname">true_size</code><span class="sig-paren">(</span><em>ser</em><span class="sig-paren">)</span><a class="headerlink" href="#grades_org.true_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obtains the true size of a Pandas Series</p>
+<p>When getting the size of a Pandas Series, any NaN or Null entries are considered
+in the count. This becomes problematic when getting student counts because Pandas
+has to append Null values to the end of DataFrame columns when the columns are not
+the same size. As a result, all cohorts end up being the same size, even though
+that’s not true. This function strips out the null values and returns the true size
+of the list. As a note, 0’s are not stripped from the list; what gets stripped is
+determined by pd.isnull()</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ser</strong> – A Pandas Series</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The size of the Pandas Series without null values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="textformatting.html" class="btn btn-neutral float-right" title="textformatting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="DataStore.html" class="btn btn-neutral float-left" title="DataStore" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Ryan Letto and Memorial University of Newfoundland
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

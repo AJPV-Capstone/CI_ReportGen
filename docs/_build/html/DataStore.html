@@ -1,0 +1,341 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>DataStore &mdash; CI_ReportGen  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="grades_org" href="grades_org.html" />
+    <link rel="prev" title="ReportConfig" href="ReportConfig.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> CI_ReportGen
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="ReportConfig.html">ReportConfig</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">DataStore</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grades_org.html">grades_org</a></li>
+<li class="toctree-l1"><a class="reference internal" href="textformatting.html">textformatting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Report.html">Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ReportGenerator.html">ReportGenerator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="procedures.html">procedures</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CI_ReportGen</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>DataStore</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/DataStore.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="datastore">
+<h1>DataStore<a class="headerlink" href="#datastore" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="DataStore.DataStore">
+<em class="property">class </em><code class="descclassname">DataStore.</code><code class="descname">DataStore</code><span class="sig-paren">(</span><em>programs=None</em>, <em>indicators_loc=None</em>, <em>grades_loc=None</em><span class="sig-paren">)</span><a class="headerlink" href="#DataStore.DataStore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Data Storage object</p>
+<p>An object that stores all of the indicator data in one place. This object was
+built to be replaced by a database interface (hence the name), and many of the
+methods reflect that. For example, the object has a query method.</p>
+<dl class="attribute">
+<dt id="DataStore.DataStore.indicators">
+<code class="descname">indicators</code><a class="headerlink" href="#DataStore.DataStore.indicators" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary of Pandas DataFrames that store
+the indicator information for each loaded program. The dictionary gets
+keyed by program</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict(pd.DataFrame)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="DataStore.DataStore.indicators_loc">
+<code class="descname">indicators_loc</code><a class="headerlink" href="#DataStore.DataStore.indicators_loc" title="Permalink to this definition">¶</a></dt>
+<dd><p>The path to the location of the indicator sheets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="DataStore.DataStore.grades_loc">
+<code class="descname">grades_loc</code><a class="headerlink" href="#DataStore.DataStore.grades_loc" title="Permalink to this definition">¶</a></dt>
+<dd><p>The path to the top folder for the grade storage</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="DataStore.DataStore.backup_file_lists">
+<code class="descname">backup_file_lists</code><a class="headerlink" href="#DataStore.DataStore.backup_file_lists" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dict of lists that store the file names
+in the backup grades subdirectories determined in ReportConfig. These
+lists allow histogram generation for programs in the cases of no
+program-specific data and also allow generation of histograms for
+Core and Co-op.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict(list)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="DataStore.DataStore.unique_courses">
+<code class="descname">unique_courses</code><a class="headerlink" href="#DataStore.DataStore.unique_courses" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Pandas DataFrame that contains information
+on courses that do not follow the standard term offered rule or that are
+not stored in the usual format. Usually, the first integer in a course
+tag (e.g. ENGI 3424) indicates the term that course is offered. However,
+some courses like CHEM 1051 are taken in term 3. Any courses that do not
+have grades stored by academic year and term offered should also be in
+this table (e.g. MATH 2000 was pulled from Banner, and the grades are
+stored by cohort). The data gets loaded from an Excel file that the object
+looks for one directory above this one called “Unique Courses.xlsx”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="ReportConfig.html#ReportConfig.ReportConfig" title="ReportConfig.ReportConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReportConfig</span></code></a></p></li>
+</ul>
+</div>
+<dl class="method">
+<dt id="DataStore.DataStore.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>programs=None</em>, <em>indicators_loc=None</em>, <em>grades_loc=None</em><span class="sig-paren">)</span><a class="headerlink" href="#DataStore.DataStore.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialization, load indicators</p>
+<p>Initializes the indicator DataFrame with data from the programs list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>programs</strong> (<em>list</em><em>(</em><em>string</em><em>)</em>) – A list of strings containing the programs to
+load indicators for. Defaults to loading indicators for every program</p></li>
+<li><p><strong>indicators_loc</strong> (<em>string</em>) – The file location for the Indicator lists. Defaults to
+finding them in the project directory using OS.path</p></li>
+<li><p><strong>grades_loc</strong> (<em>string</em>) – The location of the grades sheets. Defaults to finding
+them in the project directory using OS.path</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="DataStore.DataStore.query_indicators">
+<code class="descname">query_indicators</code><span class="sig-paren">(</span><em>program</em>, <em>dict_of_queries=None</em><span class="sig-paren">)</span><a class="headerlink" href="#DataStore.DataStore.query_indicators" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query indicators sheet</p>
+<p>Queries a specific program’s indicator list and returns a DataFrame
+containing all of the search results. The query behaves iteratively
+(i.e. it will query one option, then the next option, then the next,
+etc.).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>program</strong> (<em>string</em>) – The program to search for the indicator</p></li>
+<li><p><strong>dict_of_queries</strong> (<em>dict</em><em>(</em><em>list</em><em>)</em>) – A dictionary of lists of things to</p></li>
+<li><p><strong>The program will try to match up each dictionary key with</strong> (<em>query.</em>) – </p></li>
+<li><p><strong>first column it finds that contains part of the key in the</strong> (<em>the</em>) – </p></li>
+<li><p><strong>DataFrame. If None</strong><strong>, </strong><strong>the method will not query and will</strong> (<em>indicators</em>) – </p></li>
+<li><p><strong>return the corresponding program's indicator DataFrame</strong> (<em>just</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The DataFrame query</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="grades_org.html" class="btn btn-neutral float-right" title="grades_org" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="ReportConfig.html" class="btn btn-neutral float-left" title="ReportConfig" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Ryan Letto and Memorial University of Newfoundland
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
