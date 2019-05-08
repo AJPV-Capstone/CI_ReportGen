@@ -211,6 +211,7 @@ class ReportGenerator(object):
             * Allow multiple assessment files to exist and get generated histograms
               (e.g. allow 'ENGI 1040 Circuits Grade' and 'ENGI 1040 Circuits Grade
               by Term' to both exist)
+            * Allow customization of the file save name through ReportConfig
         """
         #------------------------------------------------------------------------------
         # Initial Autogeneration Setup
@@ -250,7 +251,7 @@ class ReportGenerator(object):
 
             # Iterate across each indicator (each row of the query)
             # logging.info("Beginning row iteration...")
-            for i, row in query.iterrows():
+            for rownumber, row in query.iterrows():
                 
                 # Skip this row if the "Assessed" column is set to any form of "No" (also check if it's there)
                 if 'Assessed' in row and row['Assessed'].lower() == 'no':
@@ -336,7 +337,7 @@ class ReportGenerator(object):
 
                 # Check the unique course table to see if the course has a unique term offering
                 term_offered = None
-                for i, unique_course in self.ds.unique_courses.iterrows():
+                for unique_course_rownum, unique_course in self.ds.unique_courses.iterrows():
                     if row['Course #'] == unique_course['Course #']:
                         term_offered = unique_course['Term Offered']
                         break
@@ -395,22 +396,34 @@ class ReportGenerator(object):
                         # the program subfolder that the indicator data belongs to. In the case
                         # Where multiple grade files were found, add a mumber to the file name.
                         #------------------------------------------------------------------------
+                        # File name formatted string setup
                         if len(save_copies_to) > 1:
-                            histogram_name = "{pth}/{loc}/{p} {ind}-{lvl} {crs} {asmt}_{i} {cfg}.pdf"   
-                        else:
-                            histogram_name= "{pth}/{loc}/{p} {ind}-{lvl} {crs} {asmt} {cfg}.pdf"
+                            # histogram_name = "{pth}/{saveloc}/{prgm} {ind}-{lvl} {crs} {asmt}_{i} {cfg}.pdf"
 
+                            # File name that reflects row number in indicator sheet and just the indicator
+                            histogram_name = "{pth}/{saveloc}/{prgm} {row} {ind}-{lvl} datafrom_{dataloc} {cfg}"
+                        else:
+                            # histogram_name= "{pth}/{saveloc}/{prgm} {ind}-{lvl} {crs} {asmt} {cfg}.pdf"
+
+                            # File name that reflects row number in indicator sheet and just the indicator
+                            histogram_name = "{pth}/{saveloc}/{prgm} {row} {ind}-{lvl} {cfg}"
+
+                        # Save iteration
                         for i in range (0, len(save_copies_to)):
+                            # File name formatted string formatting
                             save_as = histogram_name.format(
                                 pth = self.config.histograms_loc,
-                                loc = save_copies_to[i],
-                                p = program,
+                                saveloc = save_copies_to[i],
+                                prgm = program,
                                 ind = row["Indicator #"],
                                 lvl = row["Level"][0],
                                 crs = row["Course #"],
                                 asmt = row["Method of Assessment"],
                                 i = i,
-                                cfg = self.config.name
+                                cfg = self.config.name,
+                                # row is rownumber + 1 because Pandas indexes from 0, zfill adds padding zeros
+                                row = str(rownumber + 1).zfill(3),
+                                dataloc = location
                             )
                             # Make sure the save directory exists, then save the file
                             os.makedirs("{pth}/{key}".format(

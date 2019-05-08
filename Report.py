@@ -279,11 +279,18 @@ class Report(object):
         """Save Report object
 
         Args:
-            savename: Save file name
-            format: The file format to save to. Uses whatever config uses by default
+            savename(string): Save file name
+            format(string): The file format to save to. Uses whatever config uses by default.
+                If the file savename does not have the save format attached by default, this
+                program will attach it.
         """
+        # Format check
         if not format:
             format = self.config.format
+
+        # Add the format to the end of the string if it's not there
+        if not savename.endswith('.' + format):
+            savename += '.' + format
 
         logging.info("Saving Report in %s format", format)
         # Add the annotations to the figure Layout
