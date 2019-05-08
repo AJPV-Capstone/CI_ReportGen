@@ -121,3 +121,4 @@ dmypy.json
 .pyre/
 misc.py
 .vscode/settings.json
+docs/.vscode/settings.json
