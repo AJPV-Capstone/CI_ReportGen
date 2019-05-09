@@ -215,14 +215,8 @@ class ReportGenerator(object):
               by Term' to both exist)
             * Allow customization of the file save name through ReportConfig
         """
-        #------------------------------------------------------------------------------
-        # Initial Autogeneration Setup
-        #------------------------------------------------------------------------------
-
         logging.info("Beginning report autogeneration")
- 
         logging.debug("Autogenerator set up to use programs %s", ', '.join(self.programs))
-
         # Iterate across the list of programs
         for program in self.programs:
             logging.info("Generating reports for program %s", program)
@@ -231,22 +225,6 @@ class ReportGenerator(object):
             # Query the indicators DataFrame
             query = self.ds.query_indicators(program=program, dict_of_queries=self.whitelist)
 
-            #-----------------------------------------------------------------------
-            # Get a list of files in the program's grades directory. The program
-            # opens grades for the reports using file searching so that it can be
-            # less restrictive on the naming conventions and use un-separated data
-            # from other folders.
-            #-----------------------------------------------------------------------
-            # logging.info("Getting list of grade files in directory %s", self.config.grades_loc + '/' + program)
-            
-            # Search list set up as dictionary
-            # logging.info("Setting up a search list hierarchy for finding and using grades")
-            search_list = {program: os.listdir(self.config.grades_loc + '/' + program)}
-            # Add the backup file lists (also in dict form) from DataStore
-            search_list.update(self.ds.backup_file_lists)
-
-            logging.debug("Searching for grades file in folders %s", ', '.join(search_list.keys()))
-
             # Set up a file to store missing data in
             # logging.info("Starting a file to save missing data")
             missing_data = open("../Missing Data/{} missing data.txt".format(program), "w+")
@@ -254,7 +232,6 @@ class ReportGenerator(object):
             # Iterate across each indicator (each row of the query)
             # logging.info("Beginning row iteration...")
             for rownumber, row in query.iterrows():
-                
                 # Skip this row if the "Assessed" column is set to any form of "No" (also check if it's there)
                 if 'Assessed' in row and row['Assessed'].lower() == 'no':
                     # print("Found a non-assessed indicator")
@@ -296,8 +273,8 @@ class ReportGenerator(object):
                 logging.debug("Indicator data obtained from the row: %s", str(indicator_data))
 
                 #-----------------------------------------------------------------------------
-                # Use the search list to find grade files. Store all occurrences of the
-                # assessment data so that a histogram can be generated for each data set.
+                # Search for grade files. Store all occurrences of the assessment data so
+                # that a histogram can be generated for each data set.
                 #
                 # Generates a defaultdict like the following example:
                 # {
@@ -306,141 +283,157 @@ class ReportGenerator(object):
                 #     "ECE": ["ENGI 1040 Circuits Grade - ECE - Custom column names.xlsx"]
                 # }
                 # These are stored in lists because the original intention was to allow
-                # multiple assessment files for the same indicator. However, this has
-                # (probably) not been implemented yet.
+                # multiple assessment files for the same indicator.
                 #-----------------------------------------------------------------------------
-                logging.debug("Beginning search for grade files. Priority: %s", ', '.join(search_list.keys()))
+                # Use the config parameter to get the backup subdirectories
+                search_list = [program] + [x.strip() for x in self.config.grade_backup_dirs.split(',')]
+                logging.debug("Beginning search for grade files. Priority: %s", ', '.join(search_list))
 
                 found_grade_files = grades_org.directory_search(
                     course = row['Course #'],
                     assessment = row['Method of Assessment'],
                     main_dir = self.config.grades_loc,
-                    # Use the config parameter to get the other backup subdirectories
-                    subdirs = [program] + [x.strip() for x in self.config.grade_backup_dirs.split(',')]
+                    subdirs = search_list
                 )
 
-                # If the lists are empty, add data entry to missing data file
-                if not any(found_grade_files[k] for k in found_grade_files.keys()):
-                    missing_thing = "{a} {b} ({c}-{d})".format(
-                        a=row["Course #"],
-                        b=row["Method of Assessment"],
-                        c=row['Indicator #'],
-                        d=row['Level']
-                    )
-                    logging.warning("No data found for %s", missing_thing)
-                    missing_data.write("Missing data for {}\n".format(missing_thing))
-                    #-----------------------------------------------------------------------------
-                    # Set up the found_grade_files dictionary in a way that the program will
-                    # recognize as missing data and generate a blank histogram for
-                    #-----------------------------------------------------------------------------
-                    found_grade_files = {program: [None]}
-                else:
-                    logging.debug("Found files in %s", ', '.join(found_grade_files.keys()))
+                # # Check the unique course table to see if the course has a unique term offering
+                # term_offered = None
+                # for _, unique_course in self.ds.unique_courses.iterrows():
+                #     if row['Course #'] == unique_course['Course #']:
+                #         term_offered = unique_course['Term Offered']
+                #         break
 
-                # Check the unique course table to see if the course has a unique term offering
-                term_offered = None
-                for unique_course_rownum, unique_course in self.ds.unique_courses.iterrows():
-                    if row['Course #'] == unique_course['Course #']:
-                        term_offered = unique_course['Term Offered']
-                        break
-                
-                #-----------------------------------------------------------------------------
-                # Iterate across the list of grade files found and separately generate a
-                # histogram for each file. Referring to the grade file keys as the location
-                # at which the grades file was found. Generates a blank histogram in cases
-                # where no data was found.
-                #-----------------------------------------------------------------------------
-                for location in found_grade_files.keys():
-                    for file in range(0, len(found_grade_files[location])):
-                        # Provide DataFrame to generate empty histograms if no data is found
-                        if isinstance(found_grade_files[location][file], type(None)):
-                            grades = pd.DataFrame({'NO DATA FOUND': [-1]})
-                        else:   # Open the grades normally
-                            grades = pd.read_excel("{}/{}/{}".format(
-                                self.config.grades_loc,
-                                location,
-                                found_grade_files[location][file]
-                                )
-                            )
-                            # Ready the DataFrame for histogramming
-                            grades = self._ready_DataFrame(
-                                grades,
-                                course=row['Course #'],
-                                term_offered=term_offered
-                            )
+                # Run histogram generation and saving
+                self.gen_and_save_histograms(
+                    dirs_and_files=found_grade_files,
+                    dir_priorities = search_list,
+                    indicator_data = indicator_data,
+                    bins = bins,
+                    row = row,
+                    rownum = rownumber,
+                    program = program,
+                    missing_data = missing_data
+                )
 
-                        #-----------------------------------------------------------------------------
-                        # If the program that is being iterated across does not match the folder that
-                        # the data was found, that should be indicated. The program entry in the
-                        # header will always be based on which indicator lookup table the information
-                        # came from. A note gets added to the header information in the case that data
-                        # does not come from the same thing. Additionally, the program that the
-                        # indicator belongs to will always get a copy of the file saved to their
-                        # histgograms directory.
-                        #-----------------------------------------------------------------------------
-                        save_copies_to = [program]
-                        if location != program:
-                            indicator_data['Note'] = "Using data from {}".format(location)
-                            logging.debug("Additional copy of this histogram being saved to %s", location)
-                            save_copies_to.append(location)
 
-                        # Generate the Report object
-                        logging.debug("Generating histogram from %s/%s/%s",
-                            self.config.grades_loc,
-                            location,
-                            found_grade_files[location][file]
-                        )
-                        report = Report.generate_report(indicator_data, bins, self.config, grades)
 
-                        #------------------------------------------------------------------------
-                        # Save the report with a file name reflective of the program, indicator
-                        # and assessment type to the location that the data came from as well as
-                        # the program subfolder that the indicator data belongs to. In the case
-                        # Where multiple grade files were found, add a mumber to the file name.
-                        #------------------------------------------------------------------------
-                        # File name formatted string setup
-                        if len(save_copies_to) > 1:
-                            # histogram_name = "{pth}/{saveloc}/{prgm} {ind}-{lvl} {crs} {asmt}_{i} {cfg}.pdf"
 
-                            # File name that reflects row number in indicator sheet and just the indicator
-                            histogram_name = "{pth}/{saveloc}/{prgm} {row} {ind}-{lvl} datafrom_{dataloc} {cfg}"
-                        else:
-                            # histogram_name= "{pth}/{saveloc}/{prgm} {ind}-{lvl} {crs} {asmt} {cfg}.pdf"
 
-                            # File name that reflects row number in indicator sheet and just the indicator
-                            histogram_name = "{pth}/{saveloc}/{prgm} {row} {ind}-{lvl} {cfg}"
+                # # If the lists are empty, add data entry to missing data file
+                # if not any(found_grade_files[k] for k in found_grade_files.keys()):
+                #     missing_thing = "{a} {b} ({c}-{d})".format(
+                #         a=row["Course #"],
+                #         b=row["Method of Assessment"],
+                #         c=row['Indicator #'],
+                #         d=row['Level']
+                #     )
+                #     logging.warning("No data found for %s", missing_thing)
+                #     missing_data.write("Missing data for {}\n".format(missing_thing))
+                #     #-----------------------------------------------------------------------------
+                #     # Set up the found_grade_files dictionary in a way that the program will
+                #     # recognize as missing data and generate a blank histogram for
+                #     #-----------------------------------------------------------------------------
+                #     found_grade_files = {program: [None]}
+                # else:
+                #     logging.debug("Found files in %s", ', '.join(found_grade_files.keys()))
 
-                        # Save iteration
-                        for i in range (0, len(save_copies_to)):
-                            # File name formatted string formatting
-                            save_as = histogram_name.format(
-                                pth = self.config.histograms_loc,
-                                saveloc = save_copies_to[i],
-                                prgm = program,
-                                ind = row["Indicator #"],
-                                lvl = row["Level"][0],
-                                crs = row["Course #"],
-                                asmt = row["Method of Assessment"],
-                                i = i,
-                                cfg = self.config.name,
-                                # row is rownumber + 2 because Pandas indexes from 0 starting from row 2 in
-                                # the original spreadsheet. zfill adds padding zeros
-                                row = str(rownumber + 2).zfill(3),
-                                dataloc = location
-                            )
-                            # Make sure the save directory exists, then save the file
-                            os.makedirs("{pth}/{key}".format(
-                                pth = self.config.histograms_loc,
-                                key = save_copies_to[i]
-                            ),
-                            exist_ok=True
-                            )
-                            report.save(save_as)
+                # #-----------------------------------------------------------------------------
+                # # Iterate across the list of grade files found and separately generate a
+                # # histogram for each file. Referring to the grade file keys as the location
+                # # at which the grades file was found. Generates a blank histogram in cases
+                # # where no data was found.
+                # #-----------------------------------------------------------------------------
+                # for location in found_grade_files.keys():
+                #     for file in range(0, len(found_grade_files[location])):
+                #         # Provide DataFrame to generate empty histograms if no data is found
+                #         if isinstance(found_grade_files[location][file], type(None)):
+                #             grades = pd.DataFrame({'NO DATA FOUND': [-1]})
+                #         else:   # Open the grades normally
+                #             grades = pd.read_excel("{}/{}/{}".format(
+                #                 self.config.grades_loc,
+                #                 location,
+                #                 found_grade_files[location][file]
+                #                 )
+                #             )
+                #             # Ready the DataFrame for histogramming
+                #             grades = self.ready_DataFrame(
+                #                 grades,
+                #                 course=row['Course #'],
+                #                 term_offered=term_offered
+                #             )
+
+                #         #-----------------------------------------------------------------------------
+                #         # If the program that is being iterated across does not match the folder that
+                #         # the data was found, that should be indicated. The program entry in the
+                #         # header will always be based on which indicator lookup table the information
+                #         # came from. A note gets added to the header information in the case that data
+                #         # does not come from the same thing. Additionally, the program that the
+                #         # indicator belongs to will always get a copy of the file saved to their
+                #         # histgograms directory.
+                #         #-----------------------------------------------------------------------------
+                #         save_copies_to = [program]
+                #         if location != program:
+                #             indicator_data['Note'] = "Using data from {}".format(location)
+                #             logging.debug("Additional copy of this histogram being saved to %s", location)
+                #             save_copies_to.append(location)
+
+                #         # Generate the Report object
+                #         logging.debug("Generating histogram from %s/%s/%s",
+                #             self.config.grades_loc,
+                #             location,
+                #             found_grade_files[location][file]
+                #         )
+                #         report = Report.generate_report(indicator_data, bins, self.config, grades)
+
+                #         #------------------------------------------------------------------------
+                #         # Save the report with a file name reflective of the program, indicator
+                #         # and assessment type to the location that the data came from as well as
+                #         # the program subfolder that the indicator data belongs to. In the case
+                #         # Where multiple grade files were found, add a mumber to the file name.
+                #         #------------------------------------------------------------------------
+                #         # File name formatted string setup
+                #         if len(save_copies_to) > 1:
+                #             # histogram_name = "{pth}/{saveloc}/{prgm} {ind}-{lvl} {crs} {asmt}_{i} {cfg}.pdf"
+
+                #             # File name that reflects row number in indicator sheet and just the indicator
+                #             histogram_name = "{pth}/{saveloc}/{prgm} {row} {ind}-{lvl} datafrom_{dataloc} {cfg}"
+                #         else:
+                #             # histogram_name= "{pth}/{saveloc}/{prgm} {ind}-{lvl} {crs} {asmt} {cfg}.pdf"
+
+                #             # File name that reflects row number in indicator sheet and just the indicator
+                #             histogram_name = "{pth}/{saveloc}/{prgm} {row} {ind}-{lvl} {cfg}"
+
+                #         # Save iteration
+                #         for i in range (0, len(save_copies_to)):
+                #             # File name formatted string formatting
+                #             save_as = histogram_name.format(
+                #                 pth = self.config.histograms_loc,
+                #                 saveloc = save_copies_to[i],
+                #                 prgm = program,
+                #                 ind = row["Indicator #"],
+                #                 lvl = row["Level"][0],
+                #                 crs = row["Course #"],
+                #                 asmt = row["Method of Assessment"],
+                #                 i = i,
+                #                 cfg = self.config.name,
+                #                 # row is rownumber + 2 because Pandas indexes from 0 starting from row 2 in
+                #                 # the original spreadsheet. zfill adds padding zeros
+                #                 row = str(rownumber + 2).zfill(3),
+                #                 dataloc = location
+                #             )
+                #             # Make sure the save directory exists, then save the file
+                #             os.makedirs("{pth}/{key}".format(
+                #                 pth = self.config.histograms_loc,
+                #                 key = save_copies_to[i]
+                #             ),
+                #             exist_ok=True
+                #             )
+                #             report.save(save_as)
 
         logging.info("Autogeneration done!")
 
 
-    def _ready_DataFrame(self, grades, course, term_offered):
+    def ready_DataFrame(self, grades, course, term_offered):
         """Pretty up a DataFrame for histogramming
 
         This method:
@@ -460,7 +453,7 @@ class ReportGenerator(object):
 
         Args:
             grades(DataFrame): The grades that were just loaded
-            course(string): The course number
+            course(string): The course number (e.g. 'ENGI 3821')
             term_offered(int): The term that the course is offered
         
         Returns:
@@ -509,6 +502,226 @@ class ReportGenerator(object):
         
         return grades
 
+
+    def gen_and_save_histograms(self, dirs_and_files, dir_priorities, indicator_data, bins, row, rownum, program, missing_data):
+        """Generates and saves histograms for all files passed in
+
+        Each file passed to gen_and_save_histograms will have a histogram generated for it
+        and saved. 
+
+        Args:
+            dirs_and_files(dict(list(string))): The grade files that were found. See the
+                Examples section for some sample inputs
+            dir_priorities(list(string)): The directory priority to which files should be
+                saved. In cases where data is not found at the highest priority directory,
+                but data is found at a lower priority directory, the highest priority
+                directory will get a copy of the histogram(s) using the data sets in that
+                low priority directory.
+            indicator_data(dict(string)): The indicator data for generating Report objects.
+                The method will pull other required items from here such as Program,
+                Course Number, etc.
+            bins(list(int or float)): The bins for generating Report objects
+            row(pd.Series): The row that the program got all of this indicator data from
+            rownum(int): The row number that all of this indicator data is coming from
+            program(string): The program that all of this indicator data belongs to
+            missing_data: The missing data file
+
+        Examples:
+            dirs_and_files comes in like this (and dir_priorities is in the same order
+            as the keys)::
+
+                {
+                    'ENCM': ['MATH 1001 Course Grade - ENCM.xlsx'],
+                    'Core': [
+                        'MATH 1001 Course Grade - Core.xlsx',
+                        'MATH 1001 Course Grade - Core - By Semester.xlsx'
+                    ],
+                    'ECE': ['MATH 1001 Course Grade - ECE.xlsx']
+                }
+
+            Histograms get saved like so:
+                * ENCM gets a histogram of the one ENCM file
+                * Core gets 2 histograms of the Core files
+                * ECE gets 1 histogram of the ECE file
+
+            dirs_and_files comes in like this (and dir_priorities is in the same order
+            as the keys)::
+
+                {
+                    'ENCM': [],
+                    'Core': ['MATH 1001 Course Grade - Core.xlsx'],
+                    'ECE': []
+                }
+            
+            Histograms get saved like so:
+                * ENCM gets a copy of a histogram using the data from Core
+                * Core gets a copy of a histogram using their data, but ENCM's
+                  indicator information
+                * ECE gets nothing saved to it
+            
+            dirs_and files comes in like this (and dir_priorities is in the same order
+            as the keys)::
+
+                {
+                    'ENCM': [],
+                    'Core': [
+                        'MATH 1001 Course Grade - Core.xlsx',
+                        'MATH 1001 Course Grade - Core - Program Comparison.xlsx'
+                    ],
+                    'ECE': ['MATH 1001 Course Grade - ECE.xlsx']
+                }
+
+            Histograms get saved like so:
+                * ENCM gets two histograms, both copies of the ones using data from Core
+                * Core gets two histograms using their data, but with ENCM's indicator
+                  information
+                * ECE gets one histogram using their data, but with ENCM's indicator
+                  information
+
+            dirs_and_files comes in like this (and dir_priorities is in the same order
+            as the keys)::
+
+                {
+                    'ENCM': [],
+                    'Core': [],
+                    'ECE': []
+                }
+
+            Histograms get saved like so:
+                * Only ENCM gets a histogram. That histogram indicates that no data was
+                  found
+        """
+        logging.info("Preparing to save and generate a list of histograms")
+        logging.debug("dirs_and_files is %s", str(dirs_and_files))
+        logging.debug("dir_priorities is %s", str(dir_priorities))
+
+        # Keep track of the number of locations that come up empty
+        empty_locations = 0
+        # Indicates if an extra copy of the histogram needs to be saved to the top priority dir
+        save_extra_to = ""
+        if dirs_and_files[dir_priorities[0]] == []:  # If the top priority dir is empty
+            logging.debug("First priority dir %s is empty. Will save a histogram there", dir_priorities[0])
+            save_extra_to = dir_priorities[0]
+        
+        # Check the unique course table to see if the course has a unique term offering
+        term_offered = None
+        for _, unique_course in self.ds.unique_courses.iterrows():
+            if row['Course #'] == unique_course['Course #']:
+                term_offered = unique_course['Term Offered']
+                logging.info("Course %s came up with unique term_offered %s", row['Course #'], str(term_offered))
+                break
+
+        for dir in dir_priorities:
+            logging.debug("Generating histograms from dir %s", dir)
+            if dirs_and_files[dir] == []:
+                logging.debug("Dir %s is empty. Moving on...", dir)
+                empty_locations += 1
+                logging.debug("empty_locations is %i", empty_locations)
+            else:
+                # If the dir does not match the program that the indicator belongs to, indicate that
+                if dir != program:
+                    indicator_data['Notes'] = "Using data from {}".format(dir)
+
+                for file in dirs_and_files[dir]:    # For each grades file in the specified dir
+                    # Open the grades file
+                    logging.debug("Reading file %s", "{}/{}/{}".format(self.config.grades_loc, dir, file))
+                    grades = pd.read_excel("{}/{}/{}".format(self.config.grades_loc, dir, file))
+                    # Ready the DataFrame for histogramming
+                    grades = self.ready_DataFrame(grades, course=row['Course #'], term_offered=term_offered)
+
+                    # Generate a Report object
+                    rprt = Report.generate_report(indicator_data, bins, self.config, grades)
+
+                    # File name format if the list of files is only one long
+                    if len(dirs_and_files[dir]) == 1:
+                        histogram_name = "{program} {row} {ind}-{lvl} {cfg}"
+                    # File name format if the list of files is longer
+                    else:
+                        histogram_name = "{program} {row} {ind}-{lvl}_{i} {cfg}"
+                    
+                    # Save the Report to the current directory
+                    save_name = histogram_name.format(
+                        program = program,
+                        ind = row["Indicator #"],
+                        lvl = row["Level"][0],
+                        i = file.index,
+                        cfg = self.config.name,
+                        # row is rownumber + 2 because Pandas indexes from 0 starting from row 2 in
+                        # the original spreadsheet. zfill adds padding zeros
+                        row = str(rownum + 2).zfill(3)
+                    )
+                    # Make sure the save directory exists, then save the file
+                    os.makedirs("{path}/{dir}".format(path=self.config.histograms_loc, dir=dir), exist_ok=True)
+                    rprt.save("{path}/{dir}/{name}".format(
+                        path = self.config.histograms_loc,
+                        dir = dir,
+                        name = save_name
+                        )
+                    )
+
+                    # If the extra save location was specified, save a copy there
+                    if save_extra_to:
+                        os.makedirs("{path}/{dir}".format(path=self.config.histograms_loc, dir=program), exist_ok=True)
+                        rprt.save("{path}/{dir}/{name}".format(
+                            path = self.config.histograms_loc,
+                            dir = save_extra_to,
+                            name = save_name
+                            )
+                        )
+                # Set the extra save location back to an empty string to prevent further saving
+                # Happens outside of the "files in directory" for-loop so that the extra location
+                # gets copies of every file that matches the criteria. To prevent that behaviour,
+                # indent by one.
+                save_extra_to = ""
+
+        # If all locations came up empty, generate a blank histogram in the Core directory
+        if empty_locations == len(dir_priorities):
+            logging.debug("empty_locations = %i while len(dir_priorities = %i", empty_locations, len(dir_priorities))
+            # Write the missing data entry to the missing data file
+            missing_thing = "{a} {b} ({c}-{d})".format(
+                a=row["Course #"],
+                b=row["Method of Assessment"],
+                c=row['Indicator #'],
+                d=row['Level']
+            )
+            logging.warning("No data found for %s", missing_thing)
+            missing_data.write("Missing data for {}\n".format(missing_thing))
+            
+            # Set up blank histogram Report
+            grades = pd.DataFrame({'NO DATA FOUND': [-1]})
+            indicator_data['Notes'] = 'No file containing any of this assessment data was found'
+            rprt = Report.generate_report(indicator_data, bins, self.config, grades)
+
+            # Set up file name
+            histogram_name = "{program} {row} {ind}-{lvl} {cfg} NDA"
+            save_name = histogram_name.format(
+                program = program,
+                ind = row["Indicator #"],
+                lvl = row["Level"][0],
+                cfg = self.config.name,
+                # row is rownumber + 2 because Pandas indexes from 0 starting from row 2 in
+                # the original spreadsheet. zfill adds padding zeros
+                row = str(rownum + 2).zfill(3)
+            )
+
+            # Check to see that the directory exists
+            os.makedirs("{path}/{dir}".format(path=self.config.histograms_loc, dir=program), exist_ok=True)
+            rprt.save("{path}/{dir}/{name}".format(
+                path = self.config.histograms_loc,
+                dir = program,
+                name = save_name
+                )
+            )
+
+            # Save histogram to program directory
+            rprt.save("{path}/{dir}/{name}".format(
+                path = self.config.histograms_loc,
+                dir = program,
+                name = save_name
+                )
+            )
+
+        logging.info("Finished generating histograms for row %s of %s indicators", str(rownum), str(program))
 
 
     @staticmethod

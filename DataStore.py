@@ -18,11 +18,6 @@ class DataStore(object):
             keyed by program
         indicators_loc(string): The path to the location of the indicator sheets
         grades_loc(string): The path to the top folder for the grade storage
-        backup_file_lists(dict(list)): A dict of lists that store the file names
-            in the backup grades subdirectories determined in ReportConfig. These
-            lists allow histogram generation for programs in the cases of no
-            program-specific data and also allow generation of histograms for
-            Core and Co-op.
         unique_courses(pd.DataFrame): A Pandas DataFrame that contains information
             on courses that do not follow the standard term offered rule or that are
             not stored in the usual format. Usually, the first integer in a course
@@ -50,7 +45,6 @@ class DataStore(object):
                 finding them in the project directory using OS.path
             grades_loc(string): The location of the grades sheets. Defaults to finding
                 them in the project directory using OS.path
-
         """
         logging.info("Start of DataStore initialization")
         logging.info("Setting up location of Indicator lookup tables")
@@ -88,14 +82,6 @@ class DataStore(object):
             self.grades_loc = pth
         else:
             self.grades_loc = grades_loc
-
-        # Backup file directories in dict form (directories where non-separated data gets stored)
-        logging.info("Storing file lists of the Core, Co-op and ECE directories")
-        self.backup_file_lists = {
-            'Core': os.listdir(self.grades_loc + '/' + 'Core'),
-            'Co-op': os.listdir(self.grades_loc + '/' + 'Co-op'),
-            'ECE': os.listdir(self.grades_loc + '/' + 'ECE')
-        }
 
         # Open the unique course file
         logging.info("Opening the Unique Courses file")
