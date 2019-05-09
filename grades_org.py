@@ -108,26 +108,32 @@ def find_grades_files(course, assessment, file_list):
     """Find grades files in a list
 
     This search function finds files based on the following requirements:
-    - The name starts with the Course #
-    - The assessment type is in the file name
-    - The file is an Excel spreadsheet (ends with .xlsx)
+    1. The name starts with the Course # and assessment type
+    2. The file is an Excel spreadsheet (ends with .xlsx)
     When searching, it ignores case and spacing
 
     Args:
-        course: The course number to search for (i.e. 'ENGI 3891')
-        assessment: The assessment type to search for (i.e. 'Final Exam')
-        file_list: The list of files to search
+        course(string): The course number to search for (i.e. 'ENGI 3891')
+        assessment(string): The assessment type to search for (i.e. 'Final Exam')
+        file_list(list(string)): The list of files to search
 
     Returns:
         A list of all file names that match the search criteria
+    
+    TODO:
+        * Convert the matching to use regular expressions for efficiency?
     """
     matches = list()
     for file in file_list:
         bool_results = list()
         # logging.debug("Checking file %s", file)
-        bool_results.append(file.lower().strip().startswith(course.lower().strip()))
-        # logging.debug("Search for course # resulted in %s", str(bool_results[0]))
-        bool_results.append(file.lower().strip().find(assessment.lower().strip()) != -1)
+        # Check to see if file starts with course and assessment.
+        # Removes all whitespace and makes everything lowercase
+        bool_results.append(
+            ("".join(file.lower().split())).startswith("".join((course + assessment).lower().split()))
+        )
+        # logging.debug("Search for course # and assessment resulted in %s", str(bool_results[0]))
+        # Check to see if file ends with .xlsx
         bool_results.append(file.endswith(".xlsx"))
         # logging.debug("Search for .xlsx resulted in %s", str(bool_results[1]))
 
@@ -149,9 +155,10 @@ def directory_search(course, assessment, main_dir, subdirs):
         {
             "ENCM": ["ENGI 1040 Circuits Grade - ENCM.xlsx"],
             "Core": [
-                "ENGI 1040 Circuits Grade - Core - Custom column names.xlsx",
-                "ENGI 1040 Circuits Grade - Core.xlsx"
+                "ENGI 1040 Circuits Grade - Core.xlsx",
+                "ENGI 1040 Circuits Grade - Core - Custom column names.xlsx"
             ],
+            "Co-op": [],
             "ECE": []
         }
 
@@ -168,9 +175,10 @@ def directory_search(course, assessment, main_dir, subdirs):
 
     for folder in subdirs:
         logging.debug("Searching folder %s", folder)
-        # Run the find_grades_files method on the folder in the subdirectory
+        # Run the find_grades_files function on the folder in the subdirectory
         ls = find_grades_files(course, assessment, os.listdir(main_dir + '/' + folder))
+        results[folder] = []
         if ls:
-            results[folder] = ls
+            results[folder] += ls
     
     return results
