@@ -292,13 +292,13 @@ class Report(object):
         if not savename.endswith('.' + format):
             savename += '.' + format
 
-        logging.info("Saving Report in %s format", format)
         # Add the annotations to the figure Layout
         self._append_annotations()
         # Create a Plotly figure
         fig = go.Figure(data = self.traces, layout = self.layout)
         # Console print to show that the program is still running
         print("Saving", savename)
+        logging.info("Saving Report in %s format", format)
         pio.write_image(fig, savename, format)
 
     @staticmethod
