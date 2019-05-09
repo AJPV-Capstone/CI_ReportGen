@@ -10,10 +10,6 @@ import textformatting
 import logging
 import datetime
 
-# Make sure that the logs directory exists
-os.makedirs('logs', exist_ok=True)
-# Start a logger any time this file is imported
-logging.basicConfig(filename='logs/procedures-log {}.log'.format(datetime.datetime.now()), level=logging.DEBUG)
 
 
 def separate_coop_sheet(file, save_to='../Grades/'):
@@ -293,6 +289,10 @@ def histogram_by_cohort(programs=None, whitelist=None, cohorts=None):
         cohorts(int or list(int)): A list of cohorts to generate histograms for.
             The same list of cohorts that gets passed to a ReportGenerator object
     """
+    # Make sure that the logs directory exists
+    os.makedirs('logs', exist_ok=True)
+    # Start a logger
+    logging.basicConfig(filename='logs/procedures-log {}.log'.format(datetime.datetime.now()), level=logging.DEBUG)
     # Set up ReportConfig with by_cohort configuration
     config = ReportConfig(config_file="by_cohort.json")
     # Set up ReportGenerator
