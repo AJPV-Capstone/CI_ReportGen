@@ -476,21 +476,6 @@ keyed by program</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="DataStore.DataStore.backup_file_lists">
-<code class="descname">backup_file_lists</code><a class="headerlink" href="#DataStore.DataStore.backup_file_lists" title="Permalink to this definition">¶</a></dt>
-<dd><p>A dict of lists that store the file names
-in the backup grades subdirectories determined in ReportConfig. These
-lists allow histogram generation for programs in the cases of no
-program-specific data and also allow generation of histograms for
-Core and Co-op.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>dict(list)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="DataStore.DataStore.unique_courses">
 <code class="descname">unique_courses</code><a class="headerlink" href="#DataStore.DataStore.unique_courses" title="Permalink to this definition">¶</a></dt>
 <dd><p>A Pandas DataFrame that contains information
@@ -605,9 +590,10 @@ of lists to return.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;ENCM&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ENGI 1040 Circuits Grade - ENCM.xlsx&quot;</span><span class="p">],</span>
     <span class="s2">&quot;Core&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="s2">&quot;ENGI 1040 Circuits Grade - Core - Custom column names.xlsx&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ENGI 1040 Circuits Grade - Core.xlsx&quot;</span>
+        <span class="s2">&quot;ENGI 1040 Circuits Grade - Core.xlsx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ENGI 1040 Circuits Grade - Core - Custom column names.xlsx&quot;</span>
     <span class="p">],</span>
+    <span class="s2">&quot;Co-op&quot;</span><span class="p">:</span> <span class="p">[],</span>
     <span class="s2">&quot;ECE&quot;</span><span class="p">:</span> <span class="p">[]</span>
 <span class="p">}</span>
 </pre></div>
@@ -635,22 +621,27 @@ of lists to return.</p>
 <code class="descclassname">grades_org.</code><code class="descname">find_grades_files</code><span class="sig-paren">(</span><em>course</em>, <em>assessment</em>, <em>file_list</em><span class="sig-paren">)</span><a class="headerlink" href="#grades_org.find_grades_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find grades files in a list</p>
 <p>This search function finds files based on the following requirements:
-- The name starts with the Course #
-- The assessment type is in the file name
-- The file is an Excel spreadsheet (ends with .xlsx)
+1. The name starts with the Course # and assessment type
+2. The file is an Excel spreadsheet (ends with .xlsx)
 When searching, it ignores case and spacing</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>course</strong> – The course number to search for (i.e. ‘ENGI 3891’)</p></li>
-<li><p><strong>assessment</strong> – The assessment type to search for (i.e. ‘Final Exam’)</p></li>
-<li><p><strong>file_list</strong> – The list of files to search</p></li>
+<li><p><strong>course</strong> (<em>string</em>) – The course number to search for (i.e. ‘ENGI 3891’)</p></li>
+<li><p><strong>assessment</strong> (<em>string</em>) – The assessment type to search for (i.e. ‘Final Exam’)</p></li>
+<li><p><strong>file_list</strong> (<em>list</em><em>(</em><em>string</em><em>)</em>) – The list of files to search</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>A list of all file names that match the search criteria</p>
 </dd>
 </dl>
+<div class="admonition-todo admonition" id="index-0">
+<p class="admonition-title">Todo</p>
+<ul class="simple">
+<li><p>Convert the matching to use regular expressions for efficiency?</p></li>
+</ul>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -1178,6 +1169,164 @@ ReportConfig for more info)</p></li>
 <li><p>Create the method</p></li>
 </ul>
 </div>
+</dd></dl>
+
+<dl class="method">
+<dt id="ReportGenerator.ReportGenerator.gen_and_save_histograms">
+<code class="descname">gen_and_save_histograms</code><span class="sig-paren">(</span><em>dirs_and_files</em>, <em>dir_priorities</em>, <em>indicator_data</em>, <em>bins</em>, <em>row</em>, <em>rownum</em>, <em>program</em>, <em>missing_data</em><span class="sig-paren">)</span><a class="headerlink" href="#ReportGenerator.ReportGenerator.gen_and_save_histograms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates and saves histograms for all files passed in</p>
+<p>Each file passed to gen_and_save_histograms will have a histogram generated for it
+and saved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dirs_and_files</strong> (<em>dict</em><em>(</em><em>list</em><em>(</em><em>string</em><em>)</em><em>)</em>) – The grade files that were found. See the
+Examples section for some sample inputs</p></li>
+<li><p><strong>dir_priorities</strong> (<em>list</em><em>(</em><em>string</em><em>)</em>) – The directory priority to which files should be
+saved. In cases where data is not found at the highest priority directory,
+but data is found at a lower priority directory, the highest priority
+directory will get a copy of the histogram(s) using the data sets in that
+low priority directory.</p></li>
+<li><p><strong>indicator_data</strong> (<em>dict</em><em>(</em><em>string</em><em>)</em>) – The indicator data for generating Report objects.
+The method will pull other required items from here such as Program,
+Course Number, etc.</p></li>
+<li><p><strong>bins</strong> (<em>list</em><em>(</em><em>int</em><em> or </em><em>float</em><em>)</em>) – The bins for generating Report objects</p></li>
+<li><p><strong>row</strong> (<em>pd.Series</em>) – The row that the program got all of this indicator data from</p></li>
+<li><p><strong>rownum</strong> (<em>int</em>) – The row number that all of this indicator data is coming from</p></li>
+<li><p><strong>program</strong> (<em>string</em>) – The program that all of this indicator data belongs to</p></li>
+<li><p><strong>missing_data</strong> – The missing data file</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>dirs_and_files comes in like this (and dir_priorities is in the same order
+as the keys):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s1">&#39;ENCM&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MATH 1001 Course Grade - ENCM.xlsx&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;Core&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s1">&#39;MATH 1001 Course Grade - Core.xlsx&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;MATH 1001 Course Grade - Core - By Semester.xlsx&#39;</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;ECE&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MATH 1001 Course Grade - ECE.xlsx&#39;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>Histograms get saved like so:</dt><dd><ul class="simple">
+<li><p>ENCM gets a histogram of the one ENCM file</p></li>
+<li><p>Core gets 2 histograms of the Core files</p></li>
+<li><p>ECE gets 1 histogram of the ECE file</p></li>
+</ul>
+</dd>
+</dl>
+<p>dirs_and_files comes in like this (and dir_priorities is in the same order
+as the keys):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s1">&#39;ENCM&#39;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="s1">&#39;Core&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MATH 1001 Course Grade - Core.xlsx&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;ECE&#39;</span><span class="p">:</span> <span class="p">[]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>Histograms get saved like so:</dt><dd><ul class="simple">
+<li><p>ENCM gets a copy of a histogram using the data from Core</p></li>
+<li><p>Core gets a copy of a histogram using their data, but ENCM’s
+indicator information</p></li>
+<li><p>ECE gets nothing saved to it</p></li>
+</ul>
+</dd>
+</dl>
+<p>dirs_and files comes in like this (and dir_priorities is in the same order
+as the keys):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s1">&#39;ENCM&#39;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="s1">&#39;Core&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s1">&#39;MATH 1001 Course Grade - Core.xlsx&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;MATH 1001 Course Grade - Core - Program Comparison.xlsx&#39;</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;ECE&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;MATH 1001 Course Grade - ECE.xlsx&#39;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>Histograms get saved like so:</dt><dd><ul class="simple">
+<li><p>ENCM gets two histograms, both copies of the ones using data from Core</p></li>
+<li><p>Core gets two histograms using their data, but with ENCM’s indicator
+information</p></li>
+<li><p>ECE gets one histogram using their data, but with ENCM’s indicator
+information</p></li>
+</ul>
+</dd>
+</dl>
+<p>dirs_and_files comes in like this (and dir_priorities is in the same order
+as the keys):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s1">&#39;ENCM&#39;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="s1">&#39;Core&#39;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="s1">&#39;ECE&#39;</span><span class="p">:</span> <span class="p">[]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>Histograms get saved like so:</dt><dd><ul class="simple">
+<li><p>Only ENCM gets a histogram. That histogram indicates that no data was
+found</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ReportGenerator.ReportGenerator.ready_DataFrame">
+<code class="descname">ready_DataFrame</code><span class="sig-paren">(</span><em>grades</em>, <em>course</em>, <em>term_offered</em><span class="sig-paren">)</span><a class="headerlink" href="#ReportGenerator.ReportGenerator.ready_DataFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretty up a DataFrame for histogramming</p>
+<dl class="simple">
+<dt>This method:</dt><dd><ul class="simple">
+<li><p>Turns DataFrame columns into cohort messages to act as legend entries</p></li>
+<li><p>Filters cohorts if required</p></li>
+<li><p>Indicates if a cohort has no data available</p></li>
+</ul>
+</dd>
+</dl>
+<p>The columns should look something like below normally:</p>
+<table class="docutils align-center">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>201603</p></th>
+<th class="head"><p>201703</p></th>
+<th class="head"><p>201803</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>…</p></td>
+<td><p>…</p></td>
+<td><p>…</p></td>
+</tr>
+</tbody>
+</table>
+<p>The method will turn these into cohort messages and use cohort filterings. If
+a requested cohort does not appear in the grades files, a No Data column will
+get added for that cohort.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grades</strong> (<em>DataFrame</em>) – The grades that were just loaded</p></li>
+<li><p><strong>course</strong> (<em>string</em>) – The course number (e.g. ‘ENGI 3821’)</p></li>
+<li><p><strong>term_offered</strong> (<em>int</em>) – The term that the course is offered</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The prettied-up DataFrame</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>DataFrame</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">

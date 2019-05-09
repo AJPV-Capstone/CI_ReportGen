@@ -446,6 +446,8 @@ class ReportGenerator(object):
         +--------+--------+--------+
         | 201603 | 201703 | 201803 |
         +========+========+========+
+        |  ...   |  ...   |  ...   |
+        +--------+--------+--------+
 
         The method will turn these into cohort messages and use cohort filterings. If
         a requested cohort does not appear in the grades files, a No Data column will
