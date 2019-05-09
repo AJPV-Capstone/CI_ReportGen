@@ -210,9 +210,6 @@ class ReportGenerator(object):
         TODO:
             * Decouple the method
             * Change the histogram file naming conventions to be shorter
-            * Allow multiple assessment files to exist and get generated histograms
-              (e.g. allow 'ENGI 1040 Circuits Grade' and 'ENGI 1040 Circuits Grade
-              by Term' to both exist)
             * Allow customization of the file save name through ReportConfig
         """
         logging.info("Beginning report autogeneration")
@@ -646,7 +643,7 @@ class ReportGenerator(object):
                         program = program,
                         ind = row["Indicator #"],
                         lvl = row["Level"][0],
-                        i = file.index,
+                        i = dirs_and_files[dir].index(file),
                         cfg = self.config.name,
                         # row is rownumber + 2 because Pandas indexes from 0 starting from row 2 in
                         # the original spreadsheet. zfill adds padding zeros
