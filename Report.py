@@ -93,10 +93,21 @@ class Report(object):
     def plot(self, grades):
         """Plot the stored assessment
 
+        Take all data from a passed-in Pandas DataFrame, histogram it using np.histogram
+        and the bins attribute of the Report object, and bar plot it. Co-op/Likert-scale
+        bins are currently hard-coded to work properly
+
         Args:
             grades: A pandas DataFrame storing the grades that need to be plotted.
                 The program will use the column names of the DataFrame as the legend
                 entries
+        
+        TODO:
+            * Implement the ability to customize bar chart colors based on cohort. See
+              the source code for some ideas on how to do that
+            * Make the binning work better. For example, remove the hard-coded exception
+              that makes co-op data plot properly. Ultimately, this change might mean
+              moving away from np.histogram
         """
         logging.info("Setting up required resources for plotting")
         # Store the data in dicts of NumPy arrays before converting to barcharts
@@ -176,7 +187,24 @@ class Report(object):
             else:
                 logging.debug("self.config.add_percents is %s, setting bar text to percentages", str(self.config.add_percents))
                 text = tf.format_percents(data[key])
-
+            #--------------------------------------------------------------------------------
+            # TODO: Allow custom cohort coloring
+            #
+            # Code makes sense to put here. An idea on how to get custom cohort coloring:
+            # 
+            # Read the cohort from the legend entry (i.e. look for first number in entry)
+            # Look for that cohort in an external data file (e.g. JSON, Excel file, etc.)
+            # if a match is found:
+            #     retrieve the color from the file
+            # else:
+            #     let the plotting library make its own color choice
+            #
+            # For more information on getting colors on plots with Plotly, see
+            # https://plot.ly/python/bar-charts/#customizing-individual-bar-colors 
+            #
+            # It is not possible to add patterns to bar plots with Plotly (i.e. stripes,
+            # dots, etc.)
+            #--------------------------------------------------------------------------------
             logging.debug("Adding the plotly bar trace now")
             self.traces.append(go.Bar(
                 name = key,
